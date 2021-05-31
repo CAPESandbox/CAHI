@@ -1,0 +1,40 @@
+---
+- name: Install Volatility via pip
+  pip:
+    name: volatility3
+    state: present
+    executable: pip3
+    extra_args: '--user --exists-action=w'
+  register: volatility3_install
+  ignore_errors: true
+
+- name: Install Volatility from repo
+  pip:
+    name: git+https://github.com/volatilityfoundation/volatility3
+    state: present
+    executable: pip3
+  register: volatility3_repo_install
+  when: not volatility3_install is success
+
+- name: Configure Volatility symbols
+  block:
+    - name: Locate Volatility3 symbols path
+      command:
+        cmd: python3 -c "import volatility3.plugins;print(volatility3.__file__.replace('__init__.py', 'symbols/'))"
+      changed_when: false
+      register: volatility3_symbols_dir
+
+    - name: Verify Volatility symbols path exists
+      stat:
+        path: "{{ volatility3_symbols_dir.stdout }}"
+      register: volatility3_symbols_dir_verify
+      when: volatility3_symbols_dir is success and volatility3_symbols_dir.stdout is defined
+
+    - name: Download and install Volatility symbols
+      unarchive:
+        src: "{{ volatility_win_symbols_url }}"
+        dest: "{{ volatility3_symbols_dir.stdout }}"
+        remote_src: true
+      when: volatility3_symbols_dir_verify.stat.isdir is defined and volatility3_symbols_dir_verify.stat.isdir 
+      #volatility3_symbols_dir_verify.stat.exists | bool
+  when: volatility3_install is success or volatility3_repo_install is success

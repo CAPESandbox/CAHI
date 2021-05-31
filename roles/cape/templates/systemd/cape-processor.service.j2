@@ -1,0 +1,17 @@
+[Unit]
+Description=CAPEv2 report processor
+Documentation=https://github.com/kevoreilly/CAPEv2
+Wants=cape.service
+After=cape-rooter.service
+
+[Service]
+WorkingDirectory={{ cape_main_dir }}/CAPEv2//utils/
+ExecStart=/usr/bin/python3 process.py -p7 auto -pt 900
+User={{ cape_user }}
+Group={{ cape_group }}
+Restart=always
+RestartSec=5m
+LimitNOFILE=100000
+
+[Install]
+WantedBy=multi-user.target

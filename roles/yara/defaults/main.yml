@@ -1,0 +1,12 @@
+---
+yara_repo_rul: https://github.com/VirusTotal/yara.git
+yara_release_version: 4.1.0
+yara_source_code_dir: "/tmp/yara-v{{ yara_release_version }}"
+yara_default_install_dir: /usr/local/bin/
+yara_python_repo_url: https://github.com/VirusTotal/yara-python
+yara_python_source_code_dir: "/tmp/yara-python-v{{ yara_release_version }}"
+yara_config_options:
+  - enable-cuckoo
+  - enable-magic
+  - enable-dotnet
+  - enable-profiling

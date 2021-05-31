@@ -1,0 +1,75 @@
+---
+- name: Add MongoDB repository GPG key
+  apt_key:
+    url: "{{ mongodb_repo_key }}"
+    state: present
+    validate_certs: true
+
+- name: Add MongoDB repository
+  apt_repository:
+    repo: "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu {{ ansible_distribution_release }}/mongodb-org/{{ mongodb_version }} multiverse"
+    state: present
+    filename: "monogdb-org-{{ mongodb_version }}"
+    update_cache: true
+
+# Consider moving to requirements.yml
+- name: Install PyMongo
+  pip:
+    name: pymongo
+    state: present
+    extra_args: --user
+
+- name: Install MongoDB
+  apt:
+    name: mongodb-org
+    state: present
+
+- name: Create MongoDB data directory
+  file:
+    path: "{{ mongodb_db_main_path }}"
+    state: directory
+    owner: mongodb
+    group: mongodb
+
+- name: Create MongoDB db directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: mongodb
+    group: mongodb
+  loop: "{{ mongodb_db_paths }}"
+
+- name: Disable transparent hugepage
+  lineinfile:
+    path: /etc/sysfs.conf
+    line: "{{ item }}"
+    create: true
+    owner: root
+    group: root
+    mode: 0644
+  loop:
+    - kernel/mm/transparent_hugepage/enabled = never
+    - kernel/mm/transparent_hugepage/defrag = never
+
+- name: Inventory system services facts
+  service_facts:
+
+- name: Stop and Disable built-in MongDB service
+  systemd:
+    name: mongod.service
+    state: stopped
+    enabled: false
+    daemon_reload: true
+  when: '"mongod.service" in ansible_facts.services | flatten'
+
+- name: Delete built-in MongDB service unit file
+  file:
+    path: /lib/systemd/system/mongod.service
+    state: absent
+
+- name: Template MongoDB systemd unit file
+  template:
+    src: mongodb.service.j2
+    dest: /lib/systemd/system/mongodb.service
+  notify:
+    - Restart and enable MongoDB service

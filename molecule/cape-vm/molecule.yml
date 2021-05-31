@@ -1,0 +1,36 @@
+---
+scenario:
+  name: cape-vm
+
+driver:
+  name: vagrant
+  provider:
+    name: virtualbox
+lint: |
+  set -e
+  yamllint .
+  ansible-lint main.yml
+platforms:
+  - name: cape-ubuntu-vm
+    hostname: cape-ubuntu-vm
+    box: ubuntu/focal64
+    cpu: 4
+    memory: 4096
+    instance_raw_config_args:
+      - "vm.network 'forwarded_port', guest: 80, host: 8080"
+      - "vm.network 'forwarded_port', guest: 443, host: 8443"
+provisioner:
+  name: ansible
+  config_options:
+    ssh_connection:
+      pipelining: true
+  inventory:
+    #host_vars:
+    #  cape-vm-ubuntu2004:
+    #    ansible_user: ansible
+    links:
+      group_vars: ../../group_vars
+  env:
+    ANSIBLE_ROLES_PATH: ../../roles
+verifier:
+  name: ansible

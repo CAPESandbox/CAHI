@@ -1,0 +1,9 @@
+---
+- name: Include KVM variables setup Tasks
+  include_tasks: facts.yml
+
+- name: Include Qemu setup tasks
+  include_tasks: qemu.yml
+
+- name: Include seabios setup tasks
+  include_tasks: seabios.yml

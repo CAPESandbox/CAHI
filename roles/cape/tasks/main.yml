@@ -1,0 +1,110 @@
+---
+- name: Add pcap user group
+  group:
+    name: pcap
+    state: present
+
+- name: Add CAPE user group
+  group:
+    name: "{{ cape_group }}"
+    state: present
+
+- name: Create CAPE user
+  user:
+    name: "{{ cape_user | default('cape', true) }}"
+    groups:
+      - "{{ cape_group | default('cape', true) }}"
+      - pcap
+      - clamav
+    append: true
+    shell: /bin/bash
+    create_home: true
+    home: "/home/{{ cape_user | default('cape', true) }}"
+    comment: "CAPE Sandbox User"
+
+- name: Download CAPE sources
+  git:
+    repo: "{{ cape_repo_url }}"
+    dest: "{{ cape_main_dir }}/CAPEv2"
+    version: "{{ cape_repo_version }}"
+    update: true
+    force: true
+
+- name: Configure CAPE database connection
+  ini_file:
+    path: "{{ cape_main_dir }}/CAPEv2/conf/cuckoo.conf"
+    section: database
+    option: connection
+    value: "postgresql://{{ cape_user }}:{{ cape_pass }}@localhost:5432/{{ cape_user }}"
+    backup: true
+
+# Future consideration: Make virtualization backend
+# a variable to allow other platforms. Currently
+# only KVM is officially supported.
+- name: Configure CAPE virtualization backend
+  ini_file:
+    path: "{{ cape_main_dir }}/CAPEv2/conf/cuckoo.conf"
+    section: cuckoo
+    option: machinery
+    value: kvm
+    backup: true
+
+- name: Perform CAPE web migration
+  command:
+    cmd: "/usr/bin/python3 manage.py migrate"
+    chdir: "{{ cape_main_dir }}/CAPEv2/web"
+  changed_when: false
+  ignore_errors: true
+
+- name: Install CAPE community extensions
+  command:
+    cmd: "/usr/bin/python3 community.py -waf -cr"
+    chdir: "{{ cape_main_dir }}/CAPEv2/utils"
+
+- name: Ensure CAPE permissions are set
+  file:
+    path: "{{ cape_main_dir }}/CAPEv2"
+    state: directory
+    recurse: true
+    owner: "{{ cape_user }}"
+    group: "{{ cape_group }}"
+
+- name: Configure CAPE processor service
+  template:
+    src: systemd/cape-processor.service.j2
+    dest: /lib/systemd/system/cape-processor.service
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - Start and enable CAPE processor service
+
+- name: Configure CAPE rooter service
+  template:
+    src: systemd/cape-rooter.service.j2
+    dest: /lib/systemd/system/cape-rooter.service
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - Start and enable CAPE rooter service
+
+- name: Configure CAPE web services
+  template:
+    src: systemd/cape-web.service.j2
+    dest: /lib/systemd/system/cape-web.service
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - Start and enable CAPE web service
+
+- name: Configure CAPE services
+  template:
+    src: systemd/cape.service.j2
+    dest: /lib/systemd/system/cape.service
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - Start and enable CAPE service

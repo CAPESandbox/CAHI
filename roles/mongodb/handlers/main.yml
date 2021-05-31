@@ -1,0 +1,7 @@
+---
+- name: Restart and enable MongoDB service
+  systemd:
+    name: mongodb.service
+    state: restarted
+    enabled: true
+    daemon_reload: true

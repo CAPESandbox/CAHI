@@ -1,0 +1,28 @@
+---
+- name: Start and enable CAPE processor service
+  systemd:
+    name: cape-processor
+    state: restarted
+    enabled: true
+    daemon_reload: true
+
+- name: Start and enable CAPE rooter service
+  systemd:
+    name: cape-rooter
+    state: restarted
+    enabled: true
+    daemon_reload: true
+
+- name: Start and enable CAPE web service
+  systemd:
+    name: cape-web
+    state: restarted
+    enabled: true
+    daemon_reload: true
+
+- name: Start and enable CAPE service
+  systemd:
+    name: cape
+    state: restarted
+    enabled: true
+    daemon_reload: true

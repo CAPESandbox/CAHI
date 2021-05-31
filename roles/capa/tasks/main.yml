@@ -1,0 +1,33 @@
+---
+- name: Install CAPA via pip
+  pip:
+    name: flare-capa
+    state: present
+    executable: pip3
+  register: flare_capa_install
+  ignore_errors: true
+
+- name: Install CAPA via source code
+  block:
+    - name: Download CAPA source code
+      git:
+        repo: "{{ capa_repo_url }}"
+        dest: "{{ capa_source_code_dir }}"
+        recursive: true
+
+    - name: Update and initialize CAPA and rules
+      command:
+        cmd: "{{ item }}"
+        chdir: "{{ capa_source_code_dir }"
+      loop:
+        - git pull
+        - git submodule update --init rules
+
+    - name: Install CAPA
+      pip:
+        name: capa
+        state: present
+        executable: pip3
+        extra_args: "--no-index --find-links=file:///{{ capa_source_code_dir }}"
+       
+  when: not flare_capa_install is success

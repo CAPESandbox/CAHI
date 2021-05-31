@@ -1,0 +1,4 @@
+---
+cape_repo_url: https://github.com/kevoreilly/CAPEv2.git
+cape_repo_version: master
+cape_main_dir: /opt

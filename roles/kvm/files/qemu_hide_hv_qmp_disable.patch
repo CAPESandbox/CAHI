@@ -1,0 +1,305 @@
+diff --git a/block/bochs.c b/block/bochs.c
+index 2f010ab..53457c0 100644
+--- a/block/bochs.c
++++ b/block/bochs.c
+@@ -293,7 +293,7 @@ static void bochs_close(BlockDriverState *bs)
+ }
+ 
+ static BlockDriver bdrv_bochs = {
+-    .format_name	= "bochs",
++    .format_name	= "<WOOT>",
+     .instance_size	= sizeof(BDRVBochsState),
+     .bdrv_probe		= bochs_probe,
+     .bdrv_open		= bochs_open,
+diff --git a/hw/core/machine-qmp-cmds.c b/hw/core/machine-qmp-cmds.c
+index 87f1414..da1fd46 100644
+--- a/hw/core/machine-qmp-cmds.c
++++ b/hw/core/machine-qmp-cmds.c
+@@ -23,6 +23,44 @@
+ #include "sysemu/numa.h"
+ #include "sysemu/runstate.h"
+ #include "sysemu/sysemu.h"
++#include "sysemu/cpus.h"
++#include <linux/kvm.h>
++
++void qmp_toggle_hypervisor(Error **errp)
++{
++    int32_t r;
++    CPUState *cpu;
++
++    pause_all_vcpus();
++
++    CPU_FOREACH(cpu) {
++        X86CPU *x86_cpu = X86_CPU(cpu);
++        cpu_synchronize_state(cpu);
++
++        struct {
++            struct kvm_cpuid2 cpuid;
++            struct kvm_cpuid_entry2 entries[KVM_MAX_CPUID_ENTRIES];
++        } *cpuid_data = x86_cpu->cpuid_data;
++
++        for (int32_t i = 0; i < cpuid_data->cpuid.nent; i++) {
++            struct kvm_cpuid_entry2 *entry = &cpuid_data->entries[i];
++
++            if (entry->function == 1) {
++                /* eax is 1, toggle hypervisor bit */
++                entry->ecx ^= CPUID_EXT_HYPERVISOR;
++                break;
++            }
++        }
++
++        r = kvm_vcpu_ioctl(cpu, KVM_SET_CPUID2, cpuid_data);
++        if (r) {
++            error_setg(errp, "KVM_SET_CPUID2 error");
++            break;
++        }
++    }
++
++    resume_all_vcpus();
++}
+ 
+ CpuInfoList *qmp_query_cpus(Error **errp)
+ {
+diff --git a/hw/i386/fw_cfg.c b/hw/i386/fw_cfg.c
+index e48a54f..ad130dd 100644
+--- a/hw/i386/fw_cfg.c
++++ b/hw/i386/fw_cfg.c
+@@ -188,7 +188,7 @@ void fw_cfg_add_acpi_dsdt(Aml *scope, FWCfgState *fw_cfg)
+      * with half of the 16-bit control register. Hence, the total size
+      * of the i/o region used is FW_CFG_CTL_SIZE; when using DMA, the
+      * DMA control register is located at FW_CFG_DMA_IO_BASE + 4
+-     */
++     
+     Object *obj = OBJECT(fw_cfg);
+     uint8_t io_size = object_property_get_bool(obj, "dma_enabled", NULL) ?
+         ROUND_UP(FW_CFG_CTL_SIZE, 4) + sizeof(dma_addr_t) :
+@@ -198,7 +198,7 @@ void fw_cfg_add_acpi_dsdt(Aml *scope, FWCfgState *fw_cfg)
+ 
+     aml_append(dev, aml_name_decl("_HID", aml_string("QEMU0002")));
+ 
+-    /* device present, functioning, decoding, not shown in UI */
++    /* device present, functioning, decoding, not shown in UI 
+     aml_append(dev, aml_name_decl("_STA", aml_int(0xB)));
+ 
+     aml_append(crs,
+@@ -206,4 +206,7 @@ void fw_cfg_add_acpi_dsdt(Aml *scope, FWCfgState *fw_cfg)
+ 
+     aml_append(dev, aml_name_decl("_CRS", crs));
+     aml_append(scope, dev);
++    
++    */
++    //no-op for hiding QEMU
+ }
+diff --git a/hw/ide/atapi.c b/hw/ide/atapi.c
+index e791578..05ec1fe 100644
+--- a/hw/ide/atapi.c
++++ b/hw/ide/atapi.c
+@@ -792,8 +792,8 @@ static void cmd_inquiry(IDEState *s, uint8_t *buf)
+         buf[5] = 0;    /* reserved */
+         buf[6] = 0;    /* reserved */
+         buf[7] = 0;    /* reserved */
+-        padstr8(buf + 8, 8, "QEMU");
+-        padstr8(buf + 16, 16, "QEMU DVD-ROM");
++        padstr8(buf + 8, 8, "<WOOT>");
++        padstr8(buf + 16, 16, "TOSHIBA DVD-ROM");
+         padstr8(buf + 32, 4, s->version);
+         idx = 36;
+     }
+diff --git a/hw/ide/core.c b/hw/ide/core.c
+index e858216..84993fa 100644
+--- a/hw/ide/core.c
++++ b/hw/ide/core.c
+@@ -2554,13 +2554,13 @@ int ide_init_drive(IDEState *s, BlockBackend *blk, IDEDriveKind kind,
+     } else {
+         switch (kind) {
+         case IDE_CD:
+-            strcpy(s->drive_model_str, "QEMU DVD-ROM");
++            strcpy(s->drive_model_str, "TOSHIBA DVD-ROM");
+             break;
+         case IDE_CFATA:
+-            strcpy(s->drive_model_str, "QEMU MICRODRIVE");
++            strcpy(s->drive_model_str, "<WOOT> MICRODRIVE");
+             break;
+         default:
+-            strcpy(s->drive_model_str, "QEMU HARDDISK");
++            strcpy(s->drive_model_str, "WDC WD20EARS");
+             break;
+         }
+     }
+diff --git a/hw/scsi/scsi-disk.c b/hw/scsi/scsi-disk.c
+index 90841ad..85848ae 100644
+--- a/hw/scsi/scsi-disk.c
++++ b/hw/scsi/scsi-disk.c
+@@ -2398,7 +2398,7 @@ static void scsi_realize(SCSIDevice *dev, Error **errp)
+         s->version = g_strdup(qemu_hw_version());
+     }
+     if (!s->vendor) {
+-        s->vendor = g_strdup("QEMU");
++        s->vendor = g_strdup("<WOOT>");
+     }
+     if (!s->device_id) {
+         if (s->serial) {
+@@ -2454,7 +2454,7 @@ static void scsi_hd_realize(SCSIDevice *dev, Error **errp)
+     s->qdev.blocksize = s->qdev.conf.logical_block_size;
+     s->qdev.type = TYPE_DISK;
+     if (!s->product) {
+-        s->product = g_strdup("QEMU HARDDISK");
++        s->product = g_strdup("WDC WD20EARS");
+     }
+     scsi_realize(&s->qdev, errp);
+ out:
+@@ -2483,7 +2483,7 @@ static void scsi_cd_realize(SCSIDevice *dev, Error **errp)
+     s->qdev.type = TYPE_ROM;
+     s->features |= 1 << SCSI_DISK_F_REMOVABLE;
+     if (!s->product) {
+-        s->product = g_strdup("QEMU CD-ROM");
++        s->product = g_strdup("TOSHIBA DVD-ROM");
+     }
+     scsi_realize(&s->qdev, errp);
+     aio_context_release(ctx);
+diff --git a/hw/smbios/smbios.c b/hw/smbios/smbios.c
+index f22c4f5..c132734 100644
+--- a/hw/smbios/smbios.c
++++ b/hw/smbios/smbios.c
+@@ -515,7 +515,7 @@ static void smbios_build_type_0_table(void)
+ 
+     t->bios_characteristics = cpu_to_le64(0x08); /* Not supported */
+     t->bios_characteristics_extension_bytes[0] = 0;
+-    t->bios_characteristics_extension_bytes[1] = 0x14; /* TCD/SVVP | VM */
++    t->bios_characteristics_extension_bytes[1] = 0x08; /* TCD/SVVP | VM */
+     if (type0.uefi) {
+         t->bios_characteristics_extension_bytes[1] |= 0x08; /* |= UEFI */
+     }
+diff --git a/hw/usb/dev-wacom.c b/hw/usb/dev-wacom.c
+index b595048..7853b1b 100644
+--- a/hw/usb/dev-wacom.c
++++ b/hw/usb/dev-wacom.c
+@@ -172,7 +172,7 @@ static int usb_mouse_poll(USBWacomState *s, uint8_t *buf, int len)
+ 
+     if (!s->mouse_grabbed) {
+         s->eh_entry = qemu_add_mouse_event_handler(usb_mouse_event, s, 0,
+-                        "QEMU PenPartner tablet");
++                        "<WOOT> PenPartner tablet");
+         qemu_activate_mouse_event_handler(s->eh_entry);
+         s->mouse_grabbed = 1;
+     }
+@@ -210,7 +210,7 @@ static int usb_wacom_poll(USBWacomState *s, uint8_t *buf, int len)
+ 
+     if (!s->mouse_grabbed) {
+         s->eh_entry = qemu_add_mouse_event_handler(usb_wacom_event, s, 1,
+-                        "QEMU PenPartner tablet");
++                        "<WOOT> PenPartner tablet");
+         qemu_activate_mouse_event_handler(s->eh_entry);
+         s->mouse_grabbed = 1;
+     }
+@@ -355,7 +355,7 @@ static void usb_wacom_class_init(ObjectClass *klass, void *data)
+     DeviceClass *dc = DEVICE_CLASS(klass);
+     USBDeviceClass *uc = USB_DEVICE_CLASS(klass);
+ 
+-    uc->product_desc   = "QEMU PenPartner Tablet";
++    uc->product_desc   = "<WOOT> PenPartner Tablet";
+     uc->usb_desc       = &desc_wacom;
+     uc->realize        = usb_wacom_realize;
+     uc->handle_reset   = usb_wacom_handle_reset;
+@@ -363,7 +363,7 @@ static void usb_wacom_class_init(ObjectClass *klass, void *data)
+     uc->handle_data    = usb_wacom_handle_data;
+     uc->unrealize      = usb_wacom_unrealize;
+     set_bit(DEVICE_CATEGORY_INPUT, dc->categories);
+-    dc->desc = "QEMU PenPartner Tablet";
++    dc->desc = "<WOOT> PenPartner Tablet";
+     dc->vmsd = &vmstate_usb_wacom;
+ }
+ 
+diff --git a/include/hw/acpi/aml-build.h b/include/hw/acpi/aml-build.h
+index e727bea..3aa9ebb 100644
+--- a/include/hw/acpi/aml-build.h
++++ b/include/hw/acpi/aml-build.h
+@@ -7,8 +7,8 @@
+ /* Reserve RAM space for tables: add another order of magnitude. */
+ #define ACPI_BUILD_TABLE_MAX_SIZE         0x200000
+ 
+-#define ACPI_BUILD_APPNAME6 "BOCHS "
+-#define ACPI_BUILD_APPNAME4 "BXPC"
++#define ACPI_BUILD_APPNAME6 "ALASKA"
++#define ACPI_BUILD_APPNAME4 "RCKS"
+ 
+ #define ACPI_BUILD_TABLE_FILE "etc/acpi/tables"
+ #define ACPI_BUILD_RSDP_FILE "etc/acpi/rsdp"
+diff --git a/pc-bios/edk2-x86_64-code.fd.bz2 b/pc-bios/edk2-x86_64-code.fd.bz2
+index e1654d4..83fd209 100644
+Binary files a/pc-bios/edk2-x86_64-code.fd.bz2 and b/pc-bios/edk2-x86_64-code.fd.bz2 differ
+diff --git a/qapi/machine.json b/qapi/machine.json
+index 330189e..c68c270 100644
+--- a/qapi/machine.json
++++ b/qapi/machine.json
+@@ -917,6 +917,15 @@
+ { 'enum': 'HostMemPolicy',
+   'data': [ 'default', 'preferred', 'bind', 'interleave' ] }
+ 
++##
++# @toggle-hypervisor:
++#
++# Toggles the 'hypervisor' cpuid flag on all vCPUs at runtime.
++##
++{
++    'command': 'toggle-hypervisor'
++}
++
+ ##
+ # @memsave:
+ #
+diff --git a/target/i386/cpu.h b/target/i386/cpu.h
+index af13051..c700aa3 100644
+--- a/target/i386/cpu.h
++++ b/target/i386/cpu.h
+@@ -26,6 +26,8 @@
+ #include "exec/cpu-defs.h"
+ #include "qapi/qapi-types-common.h"
+ 
++#define KVM_MAX_CPUID_ENTRIES  100
++
+ /* The x86 has a strong memory model with some store-after-load re-ordering */
+ #define TCG_GUEST_DEFAULT_MO      (TCG_MO_ALL & ~TCG_MO_ST_LD)
+ 
+@@ -1765,6 +1767,8 @@ struct X86CPU {
+     int32_t thread_id;
+ 
+     int32_t hv_max_vps;
++    
++    void *cpuid_data;
+ };
+ 
+ 
+diff --git a/target/i386/kvm/kvm.c b/target/i386/kvm/kvm.c
+index 6dc1ee0..cff17cc 100644
+--- a/target/i386/kvm/kvm.c
++++ b/target/i386/kvm/kvm.c
+@@ -1459,8 +1459,6 @@ static int hyperv_init_vcpu(X86CPU *cpu)
+ 
+ static Error *invtsc_mig_blocker;
+ 
+-#define KVM_MAX_CPUID_ENTRIES  100
+-
+ int kvm_arch_init_vcpu(CPUState *cs)
+ {
+     struct {
+@@ -1522,7 +1520,7 @@ int kvm_arch_init_vcpu(CPUState *cs)
+     }
+ 
+     if (cpu->expose_kvm) {
+-        memcpy(signature, "KVMKVMKVM\0\0\0", 12);
++        memcpy(signature, "GenuineIntel", 12);
+         c = &cpuid_data.entries[cpuid_i++];
+         c->function = KVM_CPUID_SIGNATURE | kvm_base;
+         c->eax = KVM_CPUID_FEATURES | kvm_base;
+@@ -1826,6 +1824,10 @@ int kvm_arch_init_vcpu(CPUState *cs)
+     cpuid_data.cpuid.nent = cpuid_i;
+ 
+     cpuid_data.cpuid.padding = 0;
++
++    cpu->cpuid_data = malloc(sizeof(cpuid_data));
++    memcpy(cpu->cpuid_data, &cpuid_data, sizeof(cpuid_data));
++
+     r = kvm_vcpu_ioctl(cs, KVM_SET_CPUID2, &cpuid_data);
+     if (r) {
+         goto fail;

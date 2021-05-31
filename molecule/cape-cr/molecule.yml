@@ -1,0 +1,59 @@
+---
+scenario:
+  name: cape-cr
+driver:
+  name: docker
+lint: |
+  set -e
+  yamllint .
+  ansible-lint main.yml
+platforms:
+  - name: cape-sandbox-ubuntu
+    hostname: cape-sandbox-ubuntu
+    image: "cape-sandbox-ubuntu:latest"
+    dockerfile: ../../dockerfiles/ubuntu2004/Dockerfile
+    pull: false
+    privileged: true
+    exposed_ports:
+      - 80/tcp
+      - 443/tcp
+    published_ports:
+      - 80:80/tcp
+      - 443:443/tcp
+    command: ""
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    groups:
+      - cape
+  - name: cape-hypervisor-ubuntu
+    hostname: cape-hypervisor-ubuntu
+    image: "cape-hypervisor-ubuntu:latest"
+    dockerfile: ../../dockerfiles/ubuntu2004/Dockerfile
+    pull: false
+    privileged: true
+    exposed_ports:
+      - 9090/tcp
+    published_ports:
+      - 9090:9090/tcp
+    command: ""
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    groups:
+      - hypervisor
+provisioner:
+  name: ansible
+  config_options:
+    ssh_connection:
+      pipelining: true
+  inventory:
+    host_vars:
+      cape-sandbox-ubuntu:
+        ansible_user: ansible
+      cape-hypervisor-ubuntu:
+        ansible_user: ansible
+    links:
+      group_vars: ../../group_vars
+  env:
+    ANSIBLE_ROLES_PATH: ../../roles
+verifier:
+  name: ansible

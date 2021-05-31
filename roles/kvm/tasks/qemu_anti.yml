@@ -1,0 +1,249 @@
+---
+- name: Replace HD information in Qemu source code
+  replace:
+    path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/hw/{{ item }}"
+    regexp: '(\s+.*\")QEMU HARDDISK(\"\);)$'
+    replace: '\1{{ intel_qemu_hd_info }}\2'
+  loop:
+    - "ide/core.c"
+    - "scsi/scsi-disk.c"
+
+- name: Replace DVD information in Qemu source code
+  replace:
+    path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/hw/{{ item }}"
+    regexp: '(\s+.*\")QEMU DVD-ROM(\"\);)$'
+    replace: '\1{{ intel_qemu_dvd_info }}\2'
+  loop:
+    - "ide/core.c"
+    - "ide/atapi.c"
+
+- name: Replace CD information in Qemu source code
+  replace:
+    path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/hw/{{ item }}"
+    regexp: '(\s+.*\")QEMU CD-ROM(\"\);)$'
+    replace: '\1{{ intel_qemu_dvd_info }}\2'
+  loop:
+    - "scsi/scsi-disk.c"
+
+- name: Replace PenPartner in Qemu source code
+  replace:
+    path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/hw/usb/dev-wacom.c"
+    regexp: '{{ item }}'
+    replace: '\1<{{ woot }}>\2'
+  loop:
+    - '(\s+.*\")QEMU(\sPenPartner Tablet\";)$'
+    - '(\s+.*\")QEMU(\sPenPartner tablet\"\);)$'
+
+- name: Replace Microdrive in Qemu source code
+  replace:
+    path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/hw/ide/core.c"
+    regexp: '(\s+.*\")QEMU(\sMICRODRIVE\"\);)$'
+    replace: '\1<{{ woot }}>\2'
+
+- name: Replace vendor strdup in Qemu source code
+  replace:
+    path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/hw/scsi/scsi-disk.c"
+    regexp: '(\s+.*\")QEMU(\"\);)$'
+    replace: '\1<{{ woot }}>\2'
+
+- name: Replace KVMKVMKVM in Qemu source code
+  replace:
+    path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/target/i386/kvm/kvm.c"
+    regexp: '(\s+.*\")KVMKVMKVM\\0\\0\\0(\",\s+\d+\);)$'
+    replace: '\1{{ intel_hypervisor_type }}\2'
+
+- name: Replace QEMU buff in Qemu source code
+  replace:
+    path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/hw/ide/atapi.c"
+    regexp: '(\s+.*\")QEMU(\"\);)$'
+    replace: '\1<{{ woot }}>\2'
+
+- name: Replace bochs in Qemu source code
+  replace:
+    path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/block/bochs.c"
+    regexp: '(\s+.*=\s\")bochs(\",)$'
+    replace: '\1<{{ woot }}>\2'
+
+- name: Replace BOCHS in Qemu source code
+  replace:
+    path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/include/hw/acpi/aml-build.h"
+    regexp: '(^#define ACPI_BUILD_APPNAME6\s\")BOCHS\s(\")$'
+    replace: '\1ALASKA\2'
+
+- name: Replace Bochs NIC adapter in Qemu source code
+  replace:
+    path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/roms/ipxe/src/drivers/net/pnic.c"
+    regexp: '(^PCI_ROM\s\(.*\")Bochs Pseudo(\sNIC\sAdaptor\",\s0\s\),)$'
+    replace: '\1Intel RealTime\2'
+
+# Modifications below are not in kvm-qemu.sh
+- name: Extra Qemu Source Code Modifications
+  block:
+    - name: Extra - Replace BXPC in Qemu source code (aml-build.h)
+      replace:
+        path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/include/hw/acpi/aml-build.h"
+        regexp: '(^#define ACPI_BUILD_APPNAME8\s\")BXPC\s+(\")$'
+        replace: '\1RCKS\2'
+
+    - name: Extra - Replace OVMF in Qemu source code (Dsdt.asl)
+      replace:
+        path:  "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/roms/edk2/OvmfPkg/AcpiTables/Dsdt.asl"
+        regexp: '^(DefinitionBlock\s\("Dsdt\.aml",\s"DSDT",\s1,\s"INTEL\s",\s")OVMF(\s+",\s4\)\s\{)'
+        replace: '\1{{ woot }}\2'
+
+    - name: Extra - Replace OVMF in Qemu source code (Ssdt.asl)
+      replace:
+        path:  "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/roms/edk2/OvmfPkg/AcpiTables/Ssdt.asl"
+        regexp: '^(DefinitionBlock\s\("Ssdt\.aml",\s"SSDT",\s1,\s")REDHAT",\s"OVMF(\s+",\s1\)\s\{)'
+        replace: '\1<{{ woot }}>", "{{ woot }}\2'
+
+    - name: Extra - Replace Vendor TYPE0_STRINGS in Qemu source code (SmbiosPlatformDxe.c)
+      replace:
+        path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/roms/edk2/OvmfPkg/SmbiosPlatformDxe/SmbiosPlatformDxe.c"
+        regexp: '^(\s+")EFI\sDevelopment\sKit\sII\s\/\sOVMF(\\\d"\s+\/\*\sVendor\s\*\/\s\\)'
+        replace: '\1American Megatrends Inc. {{ woot }}\2'
+
+    - name: Extra - Replace BiosVersion TYPE0_STRINGS in Qemu source code (SmbiosPlatformDxe.c)
+      replace:
+        path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/roms/edk2/OvmfPkg/SmbiosPlatformDxe/SmbiosPlatformDxe.c"
+        regexp: '^(\s+")\d\.\d\.\d(\\\d"\s+\/\*\sBiosVersion\s\*\/\s\\)'
+        replace: '\g<1>{{ 3 | random(1) }}.{{ 9 | random(1) }}.{{ 9 | random(1) }}\2'
+
+    - name: Extra - Replace BiosReleaseDate TYPE0_STRINGS in Qemu source code (SmbiosPlatformDxe.c)
+      replace:
+        path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/roms/edk2/OvmfPkg/SmbiosPlatformDxe/SmbiosPlatformDxe.c"
+        regexp: '^(\s+")\d+\/\d+\/\d+(\\\d"\s+\/\*\sBiosReleaseDate\s\*\/)'
+        replace: '\g<1>{{ bios_table_date2 }}\2'
+
+    # We set facts to avoid dealing with single-quote, double-quote, escaping, etc.
+    - name: Prepare EFI_ACPI_OEM_ID replacement facts
+      set_fact:
+        efi_acpi_oem_id_regex: |-
+                ^(#define\sEFI_ACPI_OEM_ID\s+).*(,'\s','\s'\s+\/\/\sOEMID\s6\sbytes\slong)
+        efi_acpi_oem_id_replacement: |-
+                {{ woot | list | string | regex_replace('^\[(.*)\]$', '\1') | regex_replace('\s') }}
+
+    - name: Extra - Replace EFI_ACPI_OEM_ID Qemu source code (Platform.h)
+      replace:
+        path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/roms/edk2/OvmfPkg/AcpiTables/Platform.h"
+        regexp: '{{ efi_acpi_oem_id_regex }}'
+        replace: '\1{{ efi_acpi_oem_id_replacement }}\2'
+
+    - name: Prepare EFI_ACPI_OEM_TABLE_ID replacement facts
+      set_fact:
+        efi_acpi_oem_tableid_regex: |-
+                ^(#define\sEFI_ACPI_OEM_TABLE_ID\s+SIGNATURE_64\().*(\)\s+\/\/\sOEM\stable\sid\s8\sbytes\slong)
+        efi_acpi_oem_tableid_replacement: |-
+                {{ woot | list | string | regex_replace('^\[(.*)\]$', '\1') | regex_replace('\s') + woot | list | string | regex_replace('^\[(.*)\]$', '\1') | regex_replace('\s') }}
+
+    - name: Extra - Replace EFI_ACPI_OEM_TABLE_ID Qemu source code (Platform.h)
+      replace:
+        path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/roms/edk2/OvmfPkg/AcpiTables/Platform.h"
+        regexp: '{{ efi_acpi_oem_tableid_regex }}'
+        replace: '\1{{ efi_acpi_oem_tableid_replacement }}\2'
+
+    - name: Prepare EFI_ACPI_OEM_REVISION replacement facts
+      set_fact:
+        efi_acpi_oem_revision_regex: |-
+                ^(#define\sEFI_ACPI_OEM_REVISION\s+0x)\d+
+        efi_acpi_oem_revision_replacement: |-
+                {{ "%04d" | format(2021 | random(2013)) | string + "%04d" | format(2000 | random(0)) | string }}
+
+    - name: Extra - Replace EFI_ACPI_OEM_REVISION Qemu source code (Platform.h)
+      replace:
+        path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/roms/edk2/OvmfPkg/AcpiTables/Platform.h"
+        regexp: '{{ efi_acpi_oem_revision_regex }}'
+        replace: '\g<1>{{ efi_acpi_oem_revision_replacement }}'
+
+    - name: Prepare EFI_ACPI_CREATOR_ID replacement facts
+      set_fact:
+        efi_acpi_creatorid_regex: |-
+                ^(#define\sEFI_ACPI_CREATOR_ID\s+SIGNATURE_32\().*(\))
+        efi_acpi_creatorid_replacement: |-
+                {{  woot | list | string | regex_replace('^\[(.*)\]$', '\1') | regex_replace('\s') }}
+
+    - name: Extra - Replace EFI_ACPI_CREATOR_ID Qemu source code (Platform.h)
+      replace:
+        path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/roms/edk2/OvmfPkg/AcpiTables/Platform.h"
+        regexp: '{{ efi_acpi_creatorid_regex }}'
+        replace: '\1{{ efi_acpi_creatorid_replacement }}\2'
+
+    - name: Prepare EFI_ACPI_CREATOR_REVISION replacement facts
+      set_fact:
+        efi_acpi_creator_revision_regex: |-
+                ^(#define\sEFI_ACPI_CREATOR_REVISION\s0x000000)\d+
+        efi_acpi_creator_revision_replacement: |-
+                {{ "%02d" | format(99 | random(90)) | string }}
+
+    - name: Extra - Replace EFI_ACPI_CREATOR_REVISION Qemu source code (Platform.h)
+      replace:
+        path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/roms/edk2/OvmfPkg/AcpiTables/Platform.h"
+        regexp: '{{ efi_acpi_creator_revision_regex }}'
+        replace: '\g<1>{{ efi_acpi_creator_revision_replacement }}'
+
+    # If this is enabled qemu source will not compile
+    # need to revisit later.
+#    - name: Extra - Add qmp toggle hypervisor include statements to Qemu source code (machine-qmp-cmds.c)
+#      lineinfile:
+#        path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/hw/core/machine-qmp-cmds.c"
+#        line: "{{ item }}"
+#        insertafter: '^#include "sysemu/sysemu.h"$'
+#      loop:
+#        - '#include "sysemu/cpus.h"'
+#        - '#include <linux/kvm.h>'
+
+    # If this is enabled qemu source will not compile
+    # need to revisit later.
+#    - name: Extra - Add qmp toggle hypervisor include statements to Qemu source code (machine-qmp-cmds.c)
+#      blockinfile:
+#        path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/hw/core/machine-qmp-cmds.c"
+#        insertafter: '#include <linux/kvm.h>'
+#        marker: "/* qmp_toggle_hypervisor */"
+#        block: |
+
+#          void qmp_toggle_hypervisor(Error **errp)
+#          {
+#              int32_t r;
+#              CPUState *cpu;
+
+#              pause_all_vcpus();
+
+#              CPU_FOREACH(cpu) {
+#                  X86CPU *x86_cpu = X86_CPU(cpu);
+#                  cpu_synchronize_state(cpu);
+
+#                  struct {
+#                      struct kvm_cpuid2 cpuid;
+#                      struct kvm_cpuid_entry2 entries[KVM_MAX_CPUID_ENTRIES];
+#                  } *cpuid_data = x86_cpu->cpuid_data;
+
+#                  for (int32_t i = 0; i < cpuid_data->cpuid.nent; i++) {
+#                      struct kvm_cpuid_entry2 *entry = &cpuid_data->entries[i];
+
+#                      if (entry->function == 1) {
+#                          /* eax is 1, toggle hypervisor bit */
+#                          entry->ecx ^= CPUID_EXT_HYPERVISOR;
+#                          break;
+#                      }
+#                  }
+
+#                  r = kvm_vcpu_ioctl(cpu, KVM_SET_CPUID2, cpuid_data);
+#                  if (r) {
+#                      error_setg(errp, "KVM_SET_CPUID2 error");
+#                      break;
+#                  }
+#              }
+
+#              resume_all_vcpus();
+#          }
+
+
+    - name: Extra - Replace KVM CPUID
+      replace:
+        path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/include/standard-headers/asm-x86/kvm_para.h"
+        regexp: '^(#define KVM_CPUID_SIGNATURE\s+)0x40000000$'
+        replace: '\g<1>{{ intel_cpuid }}'
+
+    # TO DO: Replace KVM_CPUID_FEATURES
+
+  when: enable_extra_mod

@@ -1,0 +1,16 @@
+[Unit]
+Description=CAPE rooter
+Documentation=https://github.com/kevoreilly/CAPEv2
+Wants=network-online.target
+After=syslog.target network.target
+
+[Service]
+WorkingDirectory={{ cape_main_dir }}/CAPEv2//utils/
+ExecStart=/usr/bin/python3 rooter.py --iptables /usr/sbin/iptables --iptables-restore /usr/sbin/iptables-restore --iptables-save /usr/sbin/iptables-save -g {{ cape_user }}
+User=root
+Group=root
+Restart=always
+RestartSec=5m
+
+[Install]
+WantedBy=multi-user.target

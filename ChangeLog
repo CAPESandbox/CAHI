@@ -1,0 +1,31 @@
+2021-05-31
+  -- Role: Progress in KVM / Qemu / Seabios / anti-vm setup role.
+  -- Task: Include additional anti-vm not in kvm-qemu.sh.
+  -- Development: Redefine scenarios: default, cape-vm, cape-cr, cape-pod. See below.
+  -- Development: Add scenario (cape-pod) for development on RHEL 8 / CentOS Stream with Podman. See Known Issues doc.
+  -- Development: Add scenario (cape-cr) for multi-container (CAPE + Hypervisor).
+  -- Development: Brainstorm scenario (cape-ship); per-service multi-container setup (nginx, mongodb, postgresql, etc).
+  -- Docs: Add Known Issues documentation.
+  -- Docs: Add documentation for setting up dev environment on RHEL 8 / CentOS Stream with Podman.
+  -- Docs: Documentation updates.
+
+2021-05-19
+  -- Role: Complete time syncronization.
+  -- Role: Consolidate dependencies setup role.
+  -- Role: Complete tuning role for CAPE (VMs/physical only, won't work on containers).
+  -- Role: Complete MongoDB setup role.
+  -- Role: Complete PostgresDB setup role.
+  -- Role: Complete Yara setup role (via pip or source code).
+  -- Role: Complete ClamAV setup role (including unofficial signatures).
+  -- Role: Complete CAPA setup role (via pip or source code).
+  -- Role: Complete Volatility setup role (including configuring symbols).
+  -- Role: Complete CAPE role preliminary setup.
+  -- Role: Complete NGINX setup role (from source code, reverse proxy, demo self-signed SSL). Pending ModSecurity WAF.
+  -- Role: Preliminary roles to setup MaxMindDB and Fail2ban.
+  -- Role: Start creating virtualization (KVM) setup role.
+  -- Hardening: Complete 25 NGINX CIS Benchmarks automation.
+  -- Hardening: Review of non-breaking Ubuntu CIS Benchmarks for automation.
+  -- Development: Completed docker-based development environment setup.
+  -- Development: Started VM-based development environment setup.
+  -- Integration: Started review for GitHub CI pipeline.
+  -- Docs: Documentation targeted for CAPE development is almost done.

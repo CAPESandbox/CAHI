@@ -1,0 +1,97 @@
+---
+- name: Converge
+  hosts: all
+  become: true
+  tasks:
+    - name: CAPE Auto-Hardened Installer 
+      debug:
+        msg: "CAPE: Malware Configuration & Payload Extraction Sandbox Auto-Hardened Installer"
+
+    - name: Assert CAPE installation type
+      assert:
+        that:
+          - cape_install_type is defined
+          - cape_install_type in ['base', 'all']
+        fail_msg: "Incorrect CAPE installation type. Configure 'cape_install_type' to either 'base' or 'all'"
+
+    - name: Ensure apt cache is updated
+      apt:
+        update_cache: true
+        #cache_valid_time: 3600
+
+    - name: Include time synchronization setup tasks
+      include_role:
+        name: time
+
+    - name: Include dependencies setup tasks
+      include_role:
+        name: dependencies
+
+    - name: Include gperftools setup tasks
+      include_role:
+        name: gperftools
+
+    - name: Include Tuning configuration tasks
+      include_role:
+        name: tuner
+      when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman"]
+
+- name: Converge
+  hosts: cape
+  become: true
+  tasks:
+    - name: Include MongoDB database setup tasks
+      include_role:
+        name: mongodb
+
+    - name: Include Postgres database setup tasks
+      include_role:
+        name: postgres
+
+    - name: Include Yara setup tasks
+      include_role:
+        name: yara
+
+    - name: Include ClamAV setup tasks
+      include_role:
+        name: clamav
+
+    - name: Inlcude CAPA setup tasks
+      include_role:
+        name: capa
+
+    - name: Include Volatility setup tasks
+      include_role:
+        name: volatility
+
+#    - name: Include MaxMindDB setup tasks
+#      include_role:
+#        name: maxmind
+#      when: maxminddb_install and cape_install_type is match('all')
+
+    - name: Include Nginx setup tasks
+      include_role:
+        name: nginx
+      #when: cape_install_type is match('all')
+
+#    - name: Include Fail2ban setup tasks
+#      include_role:
+#        name: fail2ban
+#      when: fail2ban_install and cape_install_type is match('all')
+
+    - name: Include CAPE setup tasks
+      include_role:
+        name: cape
+
+- name: Converge
+  hosts: hypervisor
+  become: true
+  tasks:
+    - name: Include KVM setup tasks
+      include_role:
+        name: kvm
+
+# Disable inclusion of CIS role until issues are sorted out
+#    - name: Include CIS Benchmarks setup tasks
+#      include_role:
+#        name: cis

@@ -1,0 +1,15 @@
+---
+- name: Install Fail2ban
+  apt:
+    name: fail2ban
+    state: present
+
+- name: Inventory system services
+  service_facts: null
+
+- name: Start Fail2ban service
+  systemd:
+    name: fail2ban.service
+    state: started
+    enabled: true
+  when: ansible_facts.services['fail2ban.service'] is defined

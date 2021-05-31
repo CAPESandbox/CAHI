@@ -1,0 +1,75 @@
+diff --git a/MdeModulePkg/MdeModulePkg.dec b/MdeModulePkg/MdeModulePkg.dec
+index 9b52b34494..e75c1d4eb5 100644
+--- a/MdeModulePkg/MdeModulePkg.dec
++++ b/MdeModulePkg/MdeModulePkg.dec
+@@ -1909,7 +1909,7 @@
+   #  The OEM assigns each dissimilar table a new OEM Table ID.
+   #  This PCD is ignored for definition block.
+   # @Prompt Default OEM Table ID for ACPI table creation.
+-  gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultOemTableId|0x20202020324B4445|UINT64|0x30001035
++  gEfiMdeModulePkgTokenSpaceGuid.PcdAcpiDefaultOemTableId|0x20202020324B4544|UINT64|0x30001035
+ 
+   ## Default OEM Revision for ACPI table creation.
+   #  According to ACPI specification, for LoadTable() opcode, the OS can also
+diff --git a/OvmfPkg/AcpiTables/Dsdt.asl b/OvmfPkg/AcpiTables/Dsdt.asl
+index 7550fb46b6..bbe7355609 100644
+--- a/OvmfPkg/AcpiTables/Dsdt.asl
++++ b/OvmfPkg/AcpiTables/Dsdt.asl
+@@ -6,7 +6,7 @@
+ 
+ **/
+ 
+-DefinitionBlock ("Dsdt.aml", "DSDT", 1, "INTEL ", "OVMF    ", 4) {
++DefinitionBlock ("Dsdt.aml", "DSDT", 1, "INTEL ", "WOOT    ", 4) {
+   //
+   // System Sleep States
+   //
+diff --git a/OvmfPkg/AcpiTables/Platform.h b/OvmfPkg/AcpiTables/Platform.h
+index e4ee848961..a0b6a264bb 100644
+--- a/OvmfPkg/AcpiTables/Platform.h
++++ b/OvmfPkg/AcpiTables/Platform.h
+@@ -16,11 +16,11 @@
+ //
+ // ACPI table information used to initialize tables.
+ //
+-#define EFI_ACPI_OEM_ID           'O','V','M','F',' ',' '   // OEMID 6 bytes long
+-#define EFI_ACPI_OEM_TABLE_ID     SIGNATURE_64('O','V','M','F','E','D','K','2') // OEM table id 8 bytes long
+-#define EFI_ACPI_OEM_REVISION     0x20130221
+-#define EFI_ACPI_CREATOR_ID       SIGNATURE_32('O','V','M','F')
+-#define EFI_ACPI_CREATOR_REVISION 0x00000099
++#define EFI_ACPI_OEM_ID           'W','O','O','T',' ',' '   // OEMID 6 bytes long
++#define EFI_ACPI_OEM_TABLE_ID     SIGNATURE_64('W','O','O','T','N','O','O','B') // OEM table id 8 bytes long
++#define EFI_ACPI_OEM_REVISION     0x20201230
++#define EFI_ACPI_CREATOR_ID       SIGNATURE_32('N','O','O','B')
++#define EFI_ACPI_CREATOR_REVISION 0x00000098
+ 
+ #define SCI_INT_VECTOR  0x0009
+ #define SMI_CMD_IO_PORT 0xB2
+diff --git a/OvmfPkg/AcpiTables/Ssdt.asl b/OvmfPkg/AcpiTables/Ssdt.asl
+index 6926e56daf..970f445558 100644
+--- a/OvmfPkg/AcpiTables/Ssdt.asl
++++ b/OvmfPkg/AcpiTables/Ssdt.asl
+@@ -9,5 +9,5 @@
+   SPDX-License-Identifier: BSD-2-Clause-Patent
+ **/
+ 
+-DefinitionBlock ("Ssdt.aml", "SSDT", 1, "REDHAT", "OVMF    ", 1) {
++DefinitionBlock ("Ssdt.aml", "SSDT", 1, "<WOOT>", "WOOT    ", 1) {
+ }
+diff --git a/OvmfPkg/SmbiosPlatformDxe/SmbiosPlatformDxe.c b/OvmfPkg/SmbiosPlatformDxe/SmbiosPlatformDxe.c
+index 7991a19dc9..0109fb61a1 100644
+--- a/OvmfPkg/SmbiosPlatformDxe/SmbiosPlatformDxe.c
++++ b/OvmfPkg/SmbiosPlatformDxe/SmbiosPlatformDxe.c
+@@ -11,9 +11,9 @@
+ #include "SmbiosPlatformDxe.h"
+ 
+ #define TYPE0_STRINGS \
+-  "EFI Development Kit II / OVMF\0"     /* Vendor */ \
+-  "0.0.0\0"                             /* BiosVersion */ \
+-  "02/06/2015\0"                        /* BiosReleaseDate */
++  "American Megatrends Inc. NOOP\0"     /* Vendor */ \
++  "1.6.0\0"                             /* BiosVersion */ \
++  "12/01/2020\0"                        /* BiosReleaseDate */
+ //
+ // Type definition and contents of the default Type 0 SMBIOS table.
+ //

@@ -1,0 +1,42 @@
+---
+driver:
+  name: docker
+# Command '['git', 'ls-files', '*.yaml', '*.yml']' returned non-zero exit status 128.
+# https://github.com/ansible/ansible-lint/issues/763
+lint: |
+  set -e
+  yamllint .
+  ansible-lint main.yml
+platforms:
+  - name: cape-ubuntu2004
+    hostname: cape-ubuntu2004
+    image: "cape-ubuntu2004:latest"
+    dockerfile: ../../dockerfiles/ubuntu2004/Dockerfile
+    pull: false
+    privileged: true
+    exposed_ports:
+      - 80/tcp
+      - 443/tcp
+#      - 8000/tcp
+    published_ports:
+      - 80:80/tcp
+      - 443:443/tcp
+#      - 8000:8000/tcp
+    command: ""
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+provisioner:
+  name: ansible
+  config_options:
+    ssh_connection:
+      pipelining: true
+  inventory:
+    host_vars:
+      cape-ubuntu2004:
+        ansible_user: ansible
+    links:
+      group_vars: ../../group_vars
+  env:
+    ANSIBLE_ROLES_PATH: ../../roles
+verifier:
+  name: ansible
