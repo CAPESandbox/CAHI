@@ -1,0 +1,16 @@
+[Unit]
+Description=CAPE
+Documentation=https://github.com/kevoreilly/CAPEv2
+
+[Service]
+Environment=LD_PRELOAD=libjemalloc.so
+WorkingDirectory={{ cape_main_dir }}/CAPEv2/
+ExecStart=/usr/bin/python3 cuckoo.py
+User={{ cape_user }}
+Group={{ cape_group }}
+Restart=always
+RestartSec=5m
+LimitNOFILE=100000
+
+[Install]
+WantedBy=multi-user.target

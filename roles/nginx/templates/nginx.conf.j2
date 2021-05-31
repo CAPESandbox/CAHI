@@ -1,0 +1,119 @@
+events {
+    worker_connections {{ nginx_conf_options['worker_connections'] }};
+}
+
+http {
+    include mime.types;
+    default_type  application/octet-stream;
+
+    # CIS - 2.4.3 Ensure keepalive_timeout is 10 seconds or less, but not 0 (Scored)
+    keepalive_timeout {{ nginx_conf_options['keepalive_timeout'] }};
+    # CIS - 2.4.4 Ensure send_timeout is set to 10 seconds or less, but not 0 (Scored)
+    send_timeout {{ nginx_conf_options['send_timeout'] }};
+
+    # CIS - 5.2.1 Ensure timeout values for reading the client header and body are set correctly (Scored)
+    client_body_timeout   {{ nginx_conf_options['client_body_timeout'] }};
+    client_header_timeout {{ nginx_conf_options['client_header_timeout'] }};
+    # CIS - 5.2.3 Ensure the maximum buffer size for URIs is defined (Scored)
+    large_client_header_buffers {{ nginx_conf_options['large_client_header_buffers'] }};
+
+    # CIS - 2.5.1 Ensure server_tokens directive is set to 'off' (Scored)
+    server_tokens {{ nginx_conf_options['server_tokens'] }};
+
+    server {
+        listen 80;
+        listen [::]:80;
+        server_name {{ nginx_conf_options['server_name'] }};
+        # CIS - 4.1.1 Ensure HTTP is redirected to HTTPS (Scored)
+        return 301 https://$host$request_uri;
+    }
+    
+    server {
+        if ($http_user_agent = "") {
+            return 444;
+        }
+    
+        {% if nginx_conf_options['allowed_http_methods'] | length > 0 %}
+        # CIS - 5.1.2 Ensure only whitelisted HTTP methods are allowed (Not Scored)
+        if ($request_method !~ ^({{ nginx_conf_options['allowed_http_methods'] | join('|') }})$) {
+            return 444;
+        }
+        {% endif %}
+    
+        # CIS - 4.1.14 Ensure HTTP/2.0 is used (Not Scored)
+        listen 443 ssl http2 default_server;
+        # CIS - 4.1.4 Ensure only modern TLS protocols are used (Scored)
+        ssl_protocols {{ nginx_conf_options['ssl_protocols'] }};
+        # CIS - 4.1.5 Disable weak ciphers (Scored)
+        ssl_ciphers {{ nginx_conf_options['ssl_ciphers'] }};
+
+        ssl_certificate {{ nginx_certifcates_dir }}/{{ nginx_conf_options['ssl_certificate'] }};
+        ssl_certificate_key {{ nginx_certifcates_dir }}/{{ nginx_conf_options['ssl_certificate_key'] }};
+        
+        # CIS - 4.1.6 Ensure custom Diffie-Hellman parameters are used (Scored)
+        ssl_dhparam {{ nginx_certifcates_dir }}/{{ nginx_conf_options['ssl_dhparam'] }};
+
+        {% if nginx_conf_options['ssl_prefer_server_ciphers'] %}
+        ssl_prefer_server_ciphers on;
+        {% endif %}
+        
+        # CIS - 4.1.13 Ensure session resumption is disabled to enable perfect forward security (Scored)
+        ssl_session_tickets off;
+    
+        # CIS - 4.1.7 Ensure Online Certificate Status Protocol (OCSP) stapling is enabled (Scored)
+        {% if nginx_conf_options['enable_ocsp_stapling'] %}
+        ssl_stapling on;
+        ssl_stapling_verify on;
+        {% endif %}
+    
+        # CIS - 4.1.8 Ensure HTTP Strict Transport Security (HSTS) is enabled (Scored)
+        add_header Strict-Transport-Security {{ nginx_conf_options['hsts_header'] }};
+    
+        # CIS - 5.3.1 Ensure X-Frame-Options header is configured and enabled (Scored)
+        add_header X-Frame-Options "SAMEORIGIN";
+        # CIS - 5.3.2 Ensure X-Content-Type-Options header is configured and enabled (Scored)
+        add_header X-Content-Type-Options "nosniff";
+        # CIS - 5.3.3 Ensure the X-XSS-Protection Header is enabled and configured properly (Scored)
+        add_header X-Xss-Protection "1; mode=block";
+        # 5.3.4 Ensure that Content Security Policy (CSP) is enabled and configured properly (Not Scored)
+        add_header Content-Security-Policy "default-src 'self'";
+
+        location /static/ {
+            alias {{ cape_main_dir }}/CAPEv2/web/static/;
+        }
+
+        location / {
+            proxy_pass http://127.0.0.1:8000;
+
+            # CIS - 5.2.2 Ensure the maximum request body size is set correctly (Scored)
+            client_max_body_size    {{ nginx_conf_options['client_max_body_size'] }};
+            client_body_buffer_size {{ nginx_conf_options['client_body_buffer_size'] }};
+
+            # CIS - 2.5.4 Ensure the NGINX reverse proxy does not enable information disclosure (Scored)
+            proxy_hide_header X-Powered-By;
+            proxy_hide_header Server;
+
+            proxy_send_timeout    {{ nginx_conf_options['proxy_send_timeout'] }};
+            proxy_read_timeout    {{ nginx_conf_options['proxy_read_timeout'] }};
+            proxy_buffers         {{ nginx_conf_options['proxy_buffers'] }};
+            proxy_connect_timeout {{ nginx_conf_options['proxy_connect_timeout'] }};
+
+            proxy_set_header Host $http_host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+           
+        }
+
+        # Allow letsencrypt
+        location ~ /\.well-known\/acme-challenge {
+            allow all;
+        }
+
+        # CIS - 2.5.3 Ensure hidden file serving is disabled (Not Scored)
+        location ~ /\. {
+            deny all; 
+            return 404;
+        }
+    }
+}

@@ -1,0 +1,61 @@
+---
+- name: Clone KVM-Hidden repository
+  git:
+    repo: https://gitlab.com/DonnerPartyOf1/kvm-hidden.git
+    dest: /tmp/kvm-hidden
+    force: true
+
+- name: Modify patchies to make it work with Qemu 6.0 - Mod 1
+  replace:
+    path: "/tmp/kvm-hidden/{{ item }}"
+    regexp: '^-#define\sACPI_BUILD_APPNAME4\s"BXPC"'
+    replace: '-#define ACPI_BUILD_APPNAME8 "BXPC    "'
+  loop:
+    - qemu.patch
+    - qemu_hide_hv_qmp_disable.patch
+
+- name: Modify patchies to make it work with Qemu 6.0 - Mod 2
+  replace:
+    path: "/tmp/kvm-hidden/{{ item }}"
+    regexp: '^\s+\.bdrv_probe\s+\s=\sbochs_probe,'
+    replace: '    .bdrv_probe         = bochs_probe,'
+  loop:
+    - qemu.patch
+    - qemu_hide_hv_qmp_disable.patch
+
+- name: Modify patchies to make it work with Qemu 6.0 - Mod 3
+  replace:
+    path: /tmp/kvm-hidden/qemu_hide_hv_qmp_disable.patch
+    regexp: '{{ item.regexp }}'
+    replace: '{{ item.replace }}'
+  loop:
+    - { regexp: '^\s+#include\s"sysemu\/numa.h"', replace: ' #include "sysemu/numa.h"' }
+    - { regexp: '^\s+#include\s"sysemu\/runstate.h', replace: ' #include "sysemu/runstate.h' }
+    - { regexp: '^\s#include\s"sysemu\/sysemu.h"', replace: ' #include "sysemu/sysemu.h"' }
+
+- name: Apply KVM-Hidden edk2 patches
+  patch:
+    src: mod_patches/edk2.patch
+    basedir: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/roms/edk2"
+    strip: 1
+
+- name: Apply KVM-Hidden qemu patches
+  patch:
+    src: mod_patches/qemu.patch
+    basedir: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}"
+    strip: 1
+
+- name: Apply KVM-Hidden qemu_hide_hv_qmp_disable patches
+  patch:
+    src: /tmp/kvm-hidden/qemu_hide_hv_qmp_disable.patch
+    basedir: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}"
+    strip: 1
+    remote_src: true
+
+# applied at 
+#- name: Apply KVM-Hidden rdtscv2.patch patches
+#  patch:
+#    src: /tmp/kvm-hidden/rdtscv2.patch
+#    basedir: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}"
+#    strip: 1
+#    remote_src: true

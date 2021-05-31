@@ -1,0 +1,165 @@
+---
+#- name: Download Nginx sources and signature version {{ nginx_version }}
+#  get_url:
+#    url: "{{ item.url }}"
+#    dest: "/{{ nginx_source_code_dir }}/{{ item.name }}"
+#  loop:
+#    - { url: "{{ nginx_url }}/nginx-{{ nginx_version }}.zip", name: "nginx-{{ nginx_version }}.zip" }
+#    - { url: "{{ nginx_url }}/nginx-{{ nginx_version }}.zip.asc", name: "nginx-{{ nginx_version }}.zip.asc" }
+
+#- name: Verify file
+#  shell: "/usr/bin/gpg --verify {{ nginx_source_code_dir}}/nginx-{{ nginx_version }}.zip.asc {{ nginx_source_code_dir}}/nginx-{{ nginx_version }}.zip"
+#
+
+# cape2.sh builds nginx with www-data user/group, but
+# later adds nginx user/group and assigns permissions
+# to it. Update with variables after clarification.
+- name: Add NGINX user group
+  group:
+    name: nginx
+    state: present
+
+# Not setting the passowrd field is equivalent
+# to --disabled-login --disabled-password
+- name: Add NGINX user
+  user:
+    name: nginx
+    state: present
+    group: nginx
+    system: true
+    create_home: false
+    shell: /bin/false
+    comment: "Nginx User"
+
+- name: Download and unzip NGNIX source code
+  unarchive:
+    src: "{{ nginx_url }}/nginx-{{ nginx_version }}.tar.gz"
+    dest: "{{ nginx_source_code_dir }}"
+    remote_src: true
+
+- name: Configure NGINX source code
+  command:
+    cmd: "./configure {{ ['--'] | product(nginx_build_config_options) | map('join') | join(' ') }}"
+    chdir: "{{ nginx_source_code_dir }}/nginx-{{ nginx_version }}"
+    creates: "{{ nginx_source_code_dir }}/nginx-{{ nginx_version }}/config.log"
+
+- name: Build NGINX source code
+  make:
+    chdir: "{{ nginx_source_code_dir }}/nginx-{{ nginx_version }}"
+
+# Use checkinstall via command module as opposed to make module
+# for tracking depsite being not so ansible best-practices
+- name: Install NGINX
+  command:
+    cmd: "/usr/bin/checkinstall -D --pkgname=nginx-{{ nginx_version }} --pkgversion={{ nginx_version }} --default"
+    chdir: "{{ nginx_source_code_dir }}/nginx-{{ nginx_version }}"
+    creates: "{{ nginx_sbin_dir }}/nginx"
+
+- name: Symlink NGINX modules to /etc/nginx/modules
+  file:
+    src: "{{ nginx_modules_dir }}"
+    dest: /etc/nginx/modules
+    state: link
+    force: true
+
+- name: Create NGINX cache directories
+  file:
+    path: "{{ nginx_cache_main_dir }}/{{ item }}"
+    state: directory
+    owner: nginx
+    group: root
+    mode: 0700
+  loop: "{{ nginx_cache_temp_dir }}"
+
+# 2.3.1 Ensure NGINX directories and files are owned by root (Scored)
+# 2.3.2 Ensure access to NGINX directories and files is restricted (Scored)
+- name: Create NGINX configuration directories
+  file:
+    path: "{{ nginx_conf_dir }}/{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 'u+rwX,g+rX'
+    recurse: true
+  loop:
+    - conf.d
+    - snippets
+    - sites-available
+    - sites-enabled
+
+- name: Create Nginx http directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+  loop:
+    - "{{ nginx_http_client_body_temp_dir }}"
+    - "{{ nginx_http_fastcgi_temp_dir }}"
+    - "{{ nginx_http_proxy_temp_dir }}"
+    - "{{ nginx_http_scgi_temp_dir }}"
+    - "{{ nginx_http_uwsgi_temp_dir }}"
+
+- name: Setup NGINX demo self-signed certificate
+  block:
+    - name: Create NGNIX certificates directory
+      file:
+        path: "{{ nginx_certifcates_dir }}"
+        state: directory
+        owner: root
+        group: root
+
+    - name: Generate NGINX private key
+      openssl_privatekey:
+        path: "{{ nginx_certifcates_dir }}/{{ nginx_conf_options['ssl_certificate_key'] }}"
+        #passphrase: capesandbox
+        size: 4096
+        #cipher: auto
+
+    - name: Generate NGINX CSR
+      openssl_csr:
+        path: "{{ nginx_certifcates_dir }}/{{ nginx_conf_options['ssl_certificate_csr'] }}"
+        privatekey_path: "{{ nginx_certifcates_dir }}/{{ nginx_conf_options['ssl_certificate_key'] }}"
+        common_name: localhost
+        #privatekey_passphrase: capesandbox
+
+    - name: Generate NGINX self-signed certificate
+      openssl_certificate:
+        path: "{{ nginx_certifcates_dir }}/{{ nginx_conf_options['ssl_certificate'] }}"
+        privatekey_path: "{{ nginx_certifcates_dir }}/{{ nginx_conf_options['ssl_certificate_key'] }}"
+        #privatekey_passphrase: capesandbox
+        csr_path: "{{ nginx_certifcates_dir }}/{{ nginx_conf_options['ssl_certificate_csr'] }}"
+        provider: selfsigned
+
+  when: nginx_use_demo_certificate | bool
+
+- name: Generate NGINX dhparams
+  openssl_dhparam:
+    path: "{{ nginx_certifcates_dir }}/{{ nginx_conf_options['ssl_dhparam'] }}"
+    size: 4096
+
+- name: Template NGINX systemd service unit file
+  template:
+    src: nginx.service.j2
+    dest: /lib/systemd/system/nginx.service
+
+- name: Template NGINX configuration file
+  template:
+    src: nginx.conf.j2
+    dest: "{{ nginx_conf_dir }}/nginx.conf"
+    #trim_blocks: true
+    #validate: "{{ nginx_sbin_dir }}/nginx -t -c %s"
+  notify:
+    - Restart and enable Nginx service
+
+# 2.5.2 Ensure default error and index.html pages do not reference NGINX (Scored)
+- name: Template NGINX default index.html file
+  template:
+    src: index.html.j2
+    dest: "{{ nginx_prefix }}/html/index.html"
+
+# 2.5.2 Ensure default error and index.html pages do not reference NGINX (Scored)
+- name: Template NGINX default 50x.html file
+  template:
+    src: 50x.html.j2
+    dest: "{{ nginx_prefix }}/html/50x.html"

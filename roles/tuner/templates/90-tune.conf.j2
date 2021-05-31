@@ -1,0 +1,8 @@
+{{ cape_user | default('cape', true) }}    soft       {{ file_descriptor_limits['name'] }}          {{ file_descriptor_limits['value'] }}
+{{ cape_user | default('cape', true) }}    hard       {{ file_descriptor_limits['name'] }}          {{ file_descriptor_limits['value'] }}
+{{ cape_user | default('cape', true) }}    soft       {{ number_of_threads_limits['name'] }}           {{ number_of_threads_limits['value'] }}
+{{ cape_user | default('cape', true) }}    hard       {{ number_of_threads_limits['name'] }}           {{ number_of_threads_limits['value'] }}
+{{ cape_user | default('cape', true) }}    soft       {{ memory_lock_limits['name'] }}         {{ memory_lock_limits['value'] }}
+{{ cape_user | default('cape', true) }}    hard       {{ memory_lock_limits['name'] }}         {{ memory_lock_limits['value'] }}
+{{ cape_user | default('cape', true) }}    soft       {{ file_size_limits['name'] }}           {{ file_size_limits['value'] }}
+{{ cape_user | default('cape', true) }}    hard       {{ file_size_limits['name'] }}           {{ file_size_limits['value'] }}

@@ -1,0 +1,59 @@
+---
+- name: Check if Yara is installed
+  stat:
+    path: "{{ yara_default_install_dir }}/yara"
+  register: yara_is_installed
+
+- name: Check Yara version
+  command:
+    cmd: "{{ yara_default_install_dir }}/yara --version"
+  register: yara_installed_version
+  changed_when: false
+  when: yara_is_installed.stat is defined and yara_is_installed.stat.exists | bool
+
+- name: Download and Install Yara
+  block:
+    - name: Download Yara sources
+      git:
+        repo: "{{ yara_repo_rul }}"
+        dest: "{{ yara_source_code_dir }}"
+        version: "v{{ yara_release_version }}"
+
+    - name: Bootstrap Yara source code
+      command:
+        cmd: ./bootstrap.sh
+        chdir: "{{ yara_source_code_dir }}"
+        creates: "{{ yara_source_code_dir }}/configure"
+
+    - name: Configure Yara source code
+      command:
+        cmd: "./configure {{ ['--'] | product(yara_config_options) | map('join') | join(' ') }}"
+        chdir: "{{ yara_source_code_dir }}"
+        creates: "{{ yara_source_code_dir }}/config.log"
+
+    - name: Build Yara source code
+      make:
+        chdir: "{{ yara_source_code_dir }}"
+
+    - name: Install Yara
+      make:
+        chdir: "{{ yara_source_code_dir }}"
+        target: install
+  when: (yara_is_installed.stat is defined and not yara_is_installed.stat.exists | bool) or 
+        yara_installed_version.stdout is defined and yara_release_version > yara_installed_version.stdout
+
+- name: Download and install Yara-Python
+  block:
+    - name: Clone Yara-Python repository
+      git:
+        repo: "{{ yara_python_repo_url }}"
+        dest: "{{ yara_python_source_code_dir }}"
+        recursive: true
+        version: "v{{ yara_release_version }}"
+
+    - name: Install Yara-Python
+      pip:
+        name: yara-python
+        state: present
+        executable: pip3
+        extra_args: "--no-index --find-links=file:///{{ yara_python_source_code_dir }}"

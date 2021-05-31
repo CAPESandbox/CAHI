@@ -1,0 +1,80 @@
+---
+- name: Install Qemu dependeny apt packages
+  apt:
+    name: "{{ qemu_apt_packages }}"
+    state: present
+
+- name: Install Qemu dependency pip packages
+  pip:
+    name: "{{ qemu_pip_packages }}"
+    state: present
+    executable: pip3
+
+- name: Download and unarchive Qemu source code
+  unarchive:
+    src: "{{ qemu_download_url }}/qemu-{{ qemu_version }}.tar.xz"
+    dest: "{{ qemu_source_dir }}"
+    remote_src: true
+
+# Temporary
+- name: Include hidden-kvm patch tasks
+  include_tasks: doomedraven.yml
+  when: enable_patch_files | bool
+
+- name: Include Qemu customization tasks
+  include_tasks: qemu_anti.yml
+  when: not enable_patch_files | bool
+
+- name: Configure Qemu source code
+  command:
+    cmd: "./configure {{ ['--'] | product(qemu_build_config_options) | map('join') | join(' ') }}"
+    chdir: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}"
+
+- name: Create Qemu build directory
+  file:
+    path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}-build/DEBIAN"
+    state: directory
+
+- name: Template Qemu build control file
+  template:
+    src: control.j2
+    dest: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}-build/DEBIAN/control"
+
+- name: Make Qemu source control
+  make:
+    chdir: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}"
+    target: install
+    params:
+      NUM_THREADS: "{{ ansible_processor_cores / 2 | int }}"
+      DESTDIR: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}-build"
+
+- name: Build custom Qemu deb package
+  command:
+    cmd: "/usr/bin/dpkg-deb --build --root-owner-group {{ qemu_source_dir }}/qemu-{{ qemu_version }}-build"
+
+# Remove qemu otherwise custom qemu .deb
+# will fail installation
+- name: Remove exisitng Qemu package
+  apt:
+    name: qemu
+    state: absent
+
+- name: Install custom Qemu deb package
+  apt:
+    deb:  "{{ qemu_source_dir }}/qemu-{{ qemu_version }}-build.deb"
+    dpkg_options: 'force-overwrite'
+
+- name: Add tss user group
+  group:
+    name: tss
+    state: present
+
+- name: Add tss user
+  user:
+    name: tss
+    state: present
+    group: tss
+    system: true
+    create_home: false
+    shell: /bin/false
+    comment: "tss User"

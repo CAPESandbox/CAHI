@@ -1,0 +1,199 @@
+---
+# Temporary
+enable_patch_files: false
+
+enable_extra_mod: true
+wootme:
+  - COOP
+  - NOOP
+  - FOOT
+  - HOOB
+  - ROOB
+  - COOT
+  - XOOB
+  - YOOP
+  - BHFY
+  - PEMX
+
+kvm_cpu_randomization: true
+kvm_cpu_randomization_extra: false
+kvm_intel_cpu_names:
+  - "i7-1185G7"
+  - "i7-3770"
+  - "i7-6700"
+  - "i7-10700"
+  - "i7-8700T"
+  - "i5-10500T"
+  - "i3-2120"
+  - "i5-9400F"
+  - "i7-10510U"
+  - "i9-7940X"
+  - "i9-10900KF"
+  - "i9-10850K"
+  - "i9-10900"
+  - "i9-7900X"
+  - "i7-6900K"
+  - "i9-11900T"
+  - "i9-10900KF"
+  - "i9-9820X"
+  - "i9-7920X"
+  - "i9-9900K"
+  - "i9-10900X"
+  - "i9-7960X"
+  - "i9-7900X"
+  - "i9-9900KS"
+  - "i9-9960X"
+  - "i9-9900KF"
+  - "i9-9900K"
+  - "i9-9900X"
+  - "i9-9940X"
+  - "i9-7900X"
+
+kvm_intel_cpuid_signatures:
+  - "0x000206D6"
+  - "0x000206D7"
+  - "0x000206A5"
+  - "0x000306A4"
+  - "0x000306A9"
+  - "0x000206C2"
+  - "0x000106E5"
+  - "0x00020652"
+  - "0x000406F1"
+  - "0x000306F2"
+  - "0x000A0671"
+  - "0x00050654"
+  - "0x000A0655"
+  - "0x000906ED"
+  - "0x00050657"
+  - "0x000906EC"
+
+kvm_amd_cpu_name: []
+
+hd_models:
+  - "SAMSUNG MZ-76E120"
+  - "SAMSUNG MZ-76E250"
+  - "SAMSUNG MZ-76E500"
+  - "SAMSUNG MZ-76E1T0"
+  - "SAMSUNG MZ-76E2T0"
+  - "SAMSUNG MZ-76E4T0"
+  - "SAMSUNG MZ-VKV256"
+  - "SAMSUNG MZ-VKV512"
+  - "SAMSUNG MZ-V6E250"
+  - "SAMSUNG MZ-V6E500"
+  - "SAMSUNG MZ-V6E1T0"
+  - "SAMSUNG MZ-V5P256BW"
+  - "WD WDBA3V2500ANC-WRSN"
+  - "WD WDBA3V5000ANC-WRSN"
+  - "WD WDBA3V0010BNC-WRSN"
+  - "SanDisk SD8SN8U-128G"
+  - "SanDisk SD8SN8U-256G"
+  - "SanDisk SD8SN8U-512G"
+  - "SanDisk SD8SN8U-1T00"
+  - "SanDisk SD8SB8U-128G"
+  - "SanDisk SD8SB8U-256G"
+  - "SanDisk SD8SB8U-512G"
+  - "SanDisk SD8SB8U-1T00"
+  - "KINGSTON SA400S37"
+  - "KINGSTON SA400M8"
+  - "KINGSTON SQ500S37"
+
+dvd_models:
+  - "HL-DT-ST WH1"
+  - "HL-PV-SG WB4"
+  - "HL-PQ-SV WB8"
+
+qemu_version: 6.0.0
+qemu_download_url: https://download.qemu.org
+qemu_source_dir: /tmp
+qemu_prefix_dir: /usr
+qemu_libexec_dir: /usr/lib/qemu
+qemu_localstate_dir: /var
+qemu_bin_dir: /usr/bin/
+
+qemu_apt_packages:
+  - python3-pip
+  - checkinstall
+  - openbios-sparc
+  - openbios-ppc
+  - libssh2-1-dev
+  - vde2
+  - liblzo2-dev
+  - libghc-gtk3-dev
+  - libsnappy-dev
+  - libbz2-dev
+  - libxml2-dev
+  - libvde-dev
+  - debhelper
+  - libusb-1.0-0-dev
+  - libxen-dev
+  - uuid-dev
+  - xfslibs-dev
+  - libjpeg-dev
+  - libusbredirparser-dev
+  - device-tree-compiler
+  - texinfo
+  - libbluetooth-dev
+  - libbrlapi-dev
+  - libcap-ng-dev
+  - libcurl4-gnutls-dev
+  - libfdt-dev
+  - gnutls-dev
+  - libiscsi-dev
+  - libncurses5-dev
+  - libnuma-dev
+  - libcacard-dev
+  - librados-dev
+  - librbd-dev
+  - libsasl2-dev
+  - libseccomp-dev
+  - libspice-server-dev
+  - libaio-dev
+  - libcap-dev
+  - libattr1-dev
+  - libpixman-1-dev
+  - libgtk2.0-bin
+  - libxml2-utils
+  - systemtap-sdt-dev
+  - uml-utilities
+  - cpanminus
+  - libjemalloc-dev
+qemu_pip_packages:
+  - sphinx
+  - ninja
+
+qemu_build_config_options:
+  - "prefix={{ qemu_prefix_dir }}"
+  - "libexecdir={{ qemu_libexec_dir }}"
+  - "localstatedir={{ qemu_localstate_dir }}"
+  - "bindir={{ qemu_bin_dir }}"
+  - "target-list=i386-softmmu,x86_64-softmmu,i386-linux-user,x86_64-linux-user"
+  - enable-gnutls
+  - enable-docs
+  - enable-gtk
+  - enable-vnc
+  - enable-vnc-sasl
+  - enable-vnc-png
+  - enable-vnc-jpeg
+  - enable-curl
+  - enable-kvm
+  - enable-linux-aio
+  - enable-cap-ng
+  - enable-vhost-net
+  - enable-vhost-crypto
+  - enable-spice
+  - enable-usb-redir
+  - enable-lzo
+  - enable-snappy
+  - enable-bzip2
+  - enable-coroutine-pool
+  - enable-libxml2
+  - enable-jemalloc
+  - enable-replication
+  - enable-tools
+  - enable-capstone
+
+seabios_repo_url: https://github.com/coreboot/seabios.git
+seabios_source_dir: /tmp
+
+libvirt_version: 7.3.0
+libvirt_download_url: https://libvirt.org/sources

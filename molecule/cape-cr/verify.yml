@@ -1,0 +1,12 @@
+---
+# This is an example playbook to execute Ansible tests.
+
+- name: Verify
+  hosts: all
+  tasks:
+  - name: Gathering package facts
+    package_facts:
+      manager: auto
+  
+  - name: Gathering serivce facts
+    service_facts:

@@ -1,0 +1,53 @@
+---
+- name: Add PostgresSQL reposoitory GPG key
+  apt_key:
+    url: "{{ postgres_repo_key }}"
+    state: present
+
+- name: Add PostgresSQL repository
+  apt_repository:
+    repo: "deb http://apt.postgresql.org/pub/repos/apt {{ ansible_distribution_release }}-pgdg main"
+    state: present
+    filename: pgdg
+    update_cache: true
+
+- name: Install PostgresSQL database
+  apt:
+    name:
+      - postgresql
+      - postgresql-client
+    state: present
+
+- name: Install psycopg2
+  pip:
+    name: psycopg2
+    state: present
+
+- name: Inventory system services
+  service_facts: null
+
+- name: Start PostgresSQL service
+  systemd:
+    name: postgresql.service
+    state: started
+  when: ansible_facts.services['postgresql.service'] is defined
+  register: postgresql_service_start
+
+- name: Configure PostgresSQL for CAPE
+  block:
+    - name: Create CAPE PostgresSQL database
+      postgresql_db:
+        name: "{{ cape_db_name }}"
+        state: present
+        encoding: UTF-8
+      become_user: postgres
+
+    - name: Create CAPE PostgresSQL database user and grant permissions
+      postgresql_user:
+        name: "{{ cape_user }}"
+        password: "{{ cape_pass }}"
+        db: "{{ cape_db_name }}"
+        priv: "ALL"
+        expires: infinity
+      become_user: postgres
+  when: postgresql_service_start is success

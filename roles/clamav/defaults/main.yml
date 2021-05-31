@@ -1,0 +1,7 @@
+clamav_packages:
+  - clamav
+  - clamav-daemon
+  - clamav-freshclam
+
+clamav_unofficial_sigs_enable: true
+clamav_unofficial_sigs_conf_path: /usr/share/clamav-unofficial-sigs/conf.d/00-clamav-unofficial-sigs.conf

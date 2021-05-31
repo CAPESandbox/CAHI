@@ -1,0 +1,79 @@
+---
+- name: Collect ansible facts
+  setup:
+
+- name: Setup Intel randomization facts
+  block:
+    - name: Set processor speed fact
+      set_fact:
+        intel_cpu_speed: "{{ ansible_facts['processor'][2].split('@')[1] }}"
+
+    - name: Randomly set CPU information fact
+      set_fact:
+        intel_cpu_info: "{{ 'Intel(R) Core(TM) ' + item + ' CPU @' + intel_cpu_speed }}"
+      with_random_choice: "{{ kvm_intel_cpu_names }}"
+
+    - name: Set Hypervisor type replacement fact
+      set_fact:
+        intel_hypervisor_type: "GenuineIntel"
+
+    - name: Set BOCHSCPU type replacement fact
+      set_fact:
+        intel_bochscpu_type: "INTELCPU"
+
+    - name: Set QEMU BOCHSCPU type replacement fact
+      set_fact:
+        intel_qemu_bochscpu_type: "INTEL/INTEL"
+
+    - name: Set QEMU space type replacement fact
+      set_fact:
+        intel_qemu_space_type: "intel"
+
+    # Move 3 below tasks outside of block since they are
+    # not CPU vendor dependent
+    - name: Randomly set QEMU HD information fact
+      set_fact:
+        intel_qemu_hd_info: "{{ item }}"
+      with_random_choice: "{{ hd_models }}"
+
+    - name: Randomly set QEMU DVD information fact
+      set_fact:
+        intel_qemu_dvd_info: "{{ item }}"
+      with_random_choice: "{{ dvd_models }}"
+
+    - name: Randomly set BIOS table dates
+      set_fact:
+        bios_table_date1: "{{ '%02d' | format(12 | random(1)) + '/' + '%02d' | format(30 | random(1)) + '/' + '%02d' | format(21 | random(15)) }}"
+        bios_table_date2: "{{ '%02d' | format(12 | random(1)) + '/' + '%02d' | format(30 | random(1)) + '/' + '%04d' | format(ansible_date_time['year'] | int | random(2015)) }}"
+
+    - name: Set SMBIOS date
+      set_fact:
+        fw_smbios_date: "{{ bios_table_date2 }}"
+        #fw_smbios_date: "{{ '%02d' | format(12 | random(1)) + '/' + '%02d' | format(30 | random(1)) + '/' + '%04d' | format(ansible_date_time['year'] | int | random(2015)) }}"
+        
+    - name: Set WOOT
+      set_fact:
+        woot: "{{ item }}"
+      with_random_choice: "{{ wootme }}"
+
+    - name: Randomly set CPIUD signature
+      set_fact:
+        intel_cpuid: "{{ item }}"
+      with_random_choice: "{{ kvm_intel_cpuid_signatures }}"
+
+  when:
+    - kvm_cpu_randomization | bool
+    - not kvm_cpu_randomization_extra | bool
+    - "'GenuineIntel' in ansible_facts['processor']"
+
+- name: Setup AMD processor randomization facts
+  block:
+
+    - name: Setting up KVM under AMD is not implemented yet
+      debug:
+        msg: "Setting up KVM under AMD is not implemented yet"
+
+  when:
+    - kvm_cpu_randomization | bool
+    - not kvm_cpu_randomization_extra | bool
+    - "'AuthenticAMD' in ansible_facts['processor']"

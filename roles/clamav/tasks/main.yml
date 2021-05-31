@@ -1,0 +1,34 @@
+---
+- name: Install ClamAV
+  apt:
+    name: "{{ clamav_packages }}"
+    state: present
+  notify:
+    - Start and enable clamav daemon service
+    - Start and enable freshclam service
+
+- name: Install and configure ClamAV unofficial signatures
+  block:
+  - name: Install ClamAV unofficial signatures
+    package:
+      name: clamav-unofficial-sigs
+      state: present
+
+  - name: Configure ClamAV unofficial signatures
+    template:
+      src: 00-clamav-unofficial-sigs.conf.j2
+      dest: "{{ clamav_unofficial_sigs_conf_path }}"
+      owner: root
+      group: root
+      mode: 0644
+    notify:
+      - Start and enable clamav daemon service
+      - Start and enable freshclam service
+
+  when: clamav_unofficial_sigs_enable | bool
+
+- name: Install PyClamd
+  pip:
+    name: pyclamd
+    state: present
+    extra_args: --user

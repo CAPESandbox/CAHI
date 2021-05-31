@@ -1,0 +1,3 @@
+---
+postgres_version: 13
+postgres_repo_key: https://download.postgresql.org/pub/repos/apt/ACCC4CF8.asc

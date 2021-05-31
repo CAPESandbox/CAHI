@@ -1,0 +1,14 @@
+---
+- name: Start and enable freshclam service
+  systemd:
+    name: clamav-freshclam
+    state: restarted
+    enabled: true
+    daemon_reload: true
+
+- name: Start and enable clamav daemon service
+  systemd:
+    name: clamav-daemon.service
+    state: restarted
+    enabled: true
+    daemon_reload: true

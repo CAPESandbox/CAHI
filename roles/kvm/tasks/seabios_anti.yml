@@ -1,0 +1,92 @@
+---
+- name: Replace Bochs in SeaBios source code
+  replace:
+    path: "{{ seabios_source_dir }}/seabios/src/config.h"
+    regexp: '{{ item.regexp }}'
+    replace: '{{ item.replace }}'
+  loop:
+    - { regexp: '(^#define BUILD_APPNAME\s+\")Bochs(\")$', replace: '\1DELL\2' }
+    - { regexp: '(^#define BUILD_CPUNAME8\s+\")BOCHSCPU(\")$', replace: '\1{{ intel_bochscpu_type }}\2' }
+    - { regexp: '(^#define BUILD_APPNAME6\s+\")BOCHS\s+(\")$', replace: '\1DELL\2' }
+    - { regexp: '(^#define BUILD_APPNAME4\s+\")BXPC(\")$', replace: '\1DELL\2' }
+
+- name: Replace QEMU/Bochs in SeaBios source code
+  replace:
+    path: "{{ seabios_source_dir }}/seabios/vgasrc/Kconfig"
+    regexp: '^(\s+bool\s")QEMU\/Bochs(.*")$'
+    replace: '\1{{ intel_qemu_bochscpu_type }}\2'
+
+- name: Replace qemu in SeaBios source code
+  replace:
+    path: "{{ seabios_source_dir }}/seabios/vgasrc/Kconfig"
+    regexp: '^(\s+bool\s")qemu(\s.*")$'
+    replace: '\1{{ intel_qemu_space_type }}\2'
+
+- name: Replace QEMU in SeaBios source code
+  replace:
+    path: "{{ seabios_source_dir }}/seabios/vgasrc/Kconfig"
+    regexp: '^(\s+bool\s")QEMU(\s.*")$'
+    replace: '\1INTEL\2'
+
+- name: Replace BIOS Date Table 1 in SeaBios source code
+  replace:
+    path: "{{ seabios_source_dir }}/seabios/src/misc.c"
+    regexp: '^(char\sBiosDate\[\]\s.*=\s")\d+\/\d+\/\d+(";)$'
+    replace: '\g<1>{{ bios_table_date1 }}\2'
+
+- name: Replace BIOS Date Table 2 in SeaBios source code
+  replace:
+    path: "{{ seabios_source_dir }}/seabios/src/fw/biostables.c"
+    regexp: '^(#define\sBIOS_DATE\s")\d+\/\d+\/\d+(")$'
+    replace: '\g<1>{{ bios_table_date2 }}\2'
+
+- name: Replace BIOS Name in SeaBios source code
+  replace:
+    path: "{{ seabios_source_dir }}/seabios/src/fw/biostables.c"
+    regexp: '^(#define\sBIOS_NAME\s")SeaBIOS(")$'
+    replace: '\1AMIBIOS\2'
+
+- name: Replace SMBIOS Date in SeaBios source code
+  replace:
+    path: "{{ seabios_source_dir }}/seabios/src/fw/smbios.c"
+    regexp: '^(#define\sRELEASE_DATE_STR\s")\d+\/\d+\/\d+(")$'
+    replace: '\g<1>{{ fw_smbios_date }}\2'
+
+- name: Replace QEMU in SeaBios source code
+  replace:
+    path: "{{ seabios_source_dir }}/seabios/src/hw/blockcmd.c"
+    regexp: '^(\s+if\s\(CONFIG_QEMU_HARDWARE.*vendor,\s")QEMU(",\s\d\)\s==\s\d\)\s\{)$'
+    replace: '\1<{{ woot }}>\2'
+
+- name: Replace QEMU in SeaBios source code
+  replace:
+    path: "{{ seabios_source_dir }}/seabios/src/fw/paravirt.c"
+    regexp: '^(\s+char\s\*sig\s=\s")QEMU(";)$'
+    replace: '\1<{{ woot }}>\2'
+
+- name: Replace BXPC in SeaBios source code
+  replace:
+    path: "{{ seabios_source_dir }}/seabios/src/fw/{{ item }}"
+    regexp: '^(\s+")BXPC(",\s+\/\/\sOEMID)$'
+    replace: '\1<{{ woot }}>\2'
+  loop:
+    - "acpi-dsdt.dsl"
+    - "q35-acpi-dsdt.dsl"
+
+- name: Replace BXPC and BXSSDTPC in SeaBios source code
+  replace:
+    path: "{{ seabios_source_dir }}/seabios/src/fw/ssdt-pcihp.dsl"
+    regexp: '^(DefinitionBlock\s\(".*)BXPC(",\s")BXSSDTPC(",\s0x1\))$'
+    replace: '\1AMPC\2AMDSDT\3'
+
+- name: Replace BXPC and BXSSDT in SeaBios source code
+  replace:
+    path: "{{ seabios_source_dir }}/seabios/src/fw/ssdt-proc.dsl"
+    regexp: '^(DefinitionBlock\s\(".*)BXPC(",\s")BXSSDT(",\s0x1\))$'
+    replace: '\1AMPC\2AMSSDT\3'
+
+- name: Replace BXPC and BXSSDTSU in SeaBios source code
+  replace:
+    path: "{{ seabios_source_dir }}/seabios/src/fw/ssdt-misc.dsl"
+    regexp: '^(DefinitionBlock\s\(".*)BXPC(",\s")BXSSDTSU(",\s0x1\))$'
+    replace: '\1AMPC\2AMSSDTSU\3'

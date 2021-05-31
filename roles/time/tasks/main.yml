@@ -1,0 +1,10 @@
+---
+- name: Set remote host timezone
+  timezone:
+    name: "{{ timezone }}"
+
+- name: Include OS-specific variable
+  include_vars: "{{ ansible_os_family }}.yml"
+
+- name: Include OS-specific tasks
+  include_tasks: "{{ ansible_os_family }}.yml"

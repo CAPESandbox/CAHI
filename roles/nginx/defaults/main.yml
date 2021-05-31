@@ -1,0 +1,121 @@
+---
+nginx_dependencies:
+  - perl
+  - libperl-dev
+  - libgd3
+  - libgd-dev
+  - libgeoip1
+  - libgeoip-dev
+  - geoip-bin
+  - libxml2
+  - libxml2-dev
+  - libxslt1.1
+  - libxslt1-dev
+nginx_url: https://nginx.org/download
+nginx_source_code_dir: /tmp
+nginx_version: 1.20.0
+nginx_user: www-data
+nginx_group: www-data
+nginx_prefix: /usr/share/nginx
+nginx_sbin_dir: /usr/sbin
+nginx_modules_dir: /usr/lib/nginx/modules
+nginx_conf_dir: /etc/nginx
+nginx_pid_dir: /var/run/nginx.pid
+nginx_lock_dir: /var/lock/nginx.lock
+nginx_http_log_dir: /var/log/nginx/access.log
+nginx_error_log_dir: /var/log/nginx/error.log
+nginx_http_client_body_temp_dir: /var/lib/nginx/body
+nginx_http_fastcgi_temp_dir: /var/lib/nginx/fastcgi
+nginx_http_proxy_temp_dir: /var/lib/nginx/proxy
+nginx_http_scgi_temp_dir: /var/lib/nginx/scgi
+nginx_http_uwsgi_temp_dir: /var/lib/nginx/uwsgi
+nginx_with_cc_opt: "-g -O2 -fPIE -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2"
+nginx_with_ld_opt: "-Wl,-Bsymbolic-functions -fPIE -pie -Wl,-z,relro -Wl,-z,now"
+nginx_cache_main_dir: /var/cache/nginx
+nginx_certifcates_dir: "{{ nginx_conf_dir }}/ssl"
+nginx_cache_temp_dir:
+  - client_temp
+  - fastcgi_temp
+  - proxy_temp
+  - scgi_temp
+  - uwsgi_temp
+
+nginx_build_config_options:
+  - "prefix={{ nginx_prefix }}"
+  - "sbin-path={{ nginx_sbin_dir }}"
+  - "modules-path={{ nginx_modules_dir }}"
+  - "conf-path={{ nginx_conf_dir }}/nginx.conf"
+  - "error-log-path={{ nginx_error_log_dir }}"
+  - "http-log-path={{ nginx_http_log_dir }}"
+  - "pid-path={{ nginx_pid_dir }}"
+  - "lock-path={{ nginx_lock_dir }}"
+  - "user={{ nginx_user }}"
+  - "group={{ nginx_group }}"
+  - "build={{ ansible_distribution }}"
+  - "http-client-body-temp-path={{ nginx_http_client_body_temp_dir }}"
+  - "http-fastcgi-temp-path={{ nginx_http_fastcgi_temp_dir }}"
+  - "http-proxy-temp-path={{ nginx_http_proxy_temp_dir }}"
+  - "http-scgi-temp-path={{ nginx_http_scgi_temp_dir }}"
+  - "http-uwsgi-temp-path={{ nginx_http_uwsgi_temp_dir }}"
+  - with-pcre-jit
+  - with-compat
+  - with-file-aio
+  - with-threads
+  - with-http_addition_module
+  - with-http_auth_request_module
+#  - with-http_dav_module    # CIS - 2.1.2 Ensure HTTP WebDAV module is not installed (Scored)
+  - without-http_gzip_module # CIS - 2.1.3 Ensure modules with gzip functionality are disabled (Scored)
+#  - with-http_gunzip_module
+#  - with-http_gzip_static_module
+  - with-http_flv_module
+  - with-http_mp4_module
+  - with-http_random_index_module
+  - with-http_realip_module
+  - with-http_slice_module
+  - with-http_ssl_module
+  - with-http_sub_module
+  - with-http_stub_status_module
+  - with-http_v2_module
+  - with-http_secure_link_module
+  - with-mail
+  - with-mail_ssl_module
+  - with-stream
+  - with-stream_realip_module
+  - with-stream_ssl_module
+  - with-stream_ssl_preread_module
+  - with-google_perftools_module
+  - with-debug
+  - "with-cc-opt='{{ nginx_with_cc_opt }}'"
+  - "with-ld-opt='{{ nginx_with_ld_opt }}'"
+
+nginx_use_demo_certificate: true
+
+nginx_conf_options:
+  server_name: mysandbox.localdomain
+  worker_connections: 4096
+  keepalive_timeout: 10                 # CIS - 2.4.3 Ensure keepalive_timeout is 10 seconds or less, but not 0 (Scored)
+  send_timeout: 10                      # CIS - 2.4.4 Ensure send_timeout is set to 10 seconds or less, but not 0 (Scored)
+  server_tokens: "off"                  # CIS - 2.5.1 Ensure server_tokens directive is set to 'off' (Scored)
+  large_client_header_buffers: "2 1k"   # CIS - 5.2.3 Ensure the maximum buffer size for URIs is defined (Scored)
+  client_max_body_size: 100k            # CIS - 5.2.2 Ensure the maximum request body size is set correctly (Scored)
+  client_body_buffer_size: 512k
+  client_body_timeout: 10               # CIS - 5.2.1 Ensure timeout values for reading the client header and body are set correctly (Scored)
+  client_header_timeout: 10             # CIS - 5.2.1 Ensure timeout values for reading the client header and body are set correctly (Scored)
+  enable_proxy_hide_headers: true       # CIS - 2.5.4 Ensure the NGINX reverse proxy does not enable information disclosure (Scored)
+  ssl_prefer_server_ciphers: true
+  ssl_protocols: "TLSv1.2 TLSv1.3"
+  ssl_ciphers: "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:!EXP:!NULL:!ADH:!LOW:!SSLv2:!SSLv3:!MD5:!RC4:!aNULL:!CAMELLIA:!SHA:!RSA"
+  ssl_certificate: demo_cape_selfsigned.crt
+  ssl_certificate_key: demo_cape_selfsigned.pem
+  ssl_certificate_csr: demo_cape_selfsigned.csr
+  ssl_dhparam: dhparams.pem
+  hsts_header: '"max-age=31536000; includeSubDomains" always'
+  enable_ocsp_stapling: false
+  proxy_send_timeout: 10
+  proxy_read_timeout: 1200
+  proxy_buffers: "32 4k"
+  proxy_connect_timeout: 90
+  allowed_http_methods:
+    - HEAD
+    - GET
+    - POST

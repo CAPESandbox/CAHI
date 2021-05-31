@@ -1,0 +1,14 @@
+# GeoIP.conf file for `geoipupdate` program, for versions >= 3.1.1.
+# # Used to update GeoIP databases from https://www.maxmind.com.
+# # For more information about this config file, visit the docs at
+# # https://dev.maxmind.com/geoip/geoipupdate/.
+
+# 'AccountID' is from your MaxMind account.
+AccountID {{ maxminddb_account_id }}
+
+# Replace YOUR_LICENSE_KEY_HERE with an active license key associated 
+# with your MaxMind account: https://www.maxmind.com/en/accounts/{{ maxminddb_account_id }}/license-key
+LicenseKey {{ maxminddb_license_key }}
+
+# 'EditionIDs' is from your MaxMind account.
+EditionIDs {{ maxminddb_edition_id }}

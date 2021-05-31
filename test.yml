@@ -1,0 +1,19 @@
+- name: localtests
+  hosts: localhost
+  become: false
+  vars:
+    woot: FOOT
+    mydate: "01/02/99"
+  tasks:
+    - debug:
+        msg: '{{ "%04d" | format(2021 | random(2013)) | string + "%04d" | format(2000 | random(0)) | string }}'
+
+    - set_fact:
+        x: |-
+          {{ woot | list | string | regex_replace('^\[(.*)\]$', '\1') | regex_replace('\s') + woot | list | string | regex_replace('^\[(.*)\]$', '\1') | regex_replace('\s') | reverse }}
+    - debug: var=x
+
+#'{{ "''%s," | format(woot | list) | join("") }}'
+#'{{ "''%s''" | format(woot | list ) | regex_replace("^''\[(.*)\]''", ''\\1)  }}'
+#
+#{{  woot | list | regex_replace('^(.*)$', "'\1'") }}

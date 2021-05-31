@@ -1,0 +1,14 @@
+---
+- name: Restart and enable ntp service
+  systemd:
+    name: ntp.service
+    state: restarted
+    enabled: true
+    daemon_reload: true
+
+- name: Restart and enable chrony service
+  systemd:
+    name: chronyd.service
+    state: restarted
+    enabled: true
+    daemon_reload: true

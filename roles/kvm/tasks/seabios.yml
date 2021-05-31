@@ -1,0 +1,101 @@
+---
+- name: Install SeaBios build dependencies
+  apt:
+    name: acpica-tools
+    state: present
+
+- name: Clone SeaBios repository
+  git:
+    repo: "{{ seabios_repo_url }}"
+    dest: "{{ seabios_source_dir }}/seabios"
+    force: true
+
+- name: Include SeaBios customization tasks
+  include_tasks: seabios_anti.yml
+
+# First make (before Makefile changes) requires python2
+# Add python-dev to dependencies
+- name: Install Python2 for SeaBios pre-customization build
+  apt:
+    name: python2-dev
+    state: present
+
+- name: Ensure SeaBios can find Python2 in Makefile
+  replace:
+    path: "{{ seabios_source_dir }}/seabios/Makefile"
+    regexp: '^PYTHON=python$'
+    replace: 'PYTHON=python2'
+
+- name: Make SeaBios
+  make:
+    chdir: "{{ seabios_source_dir }}/seabios"
+    params:
+      NUM_THREADS: "{{ ansible_processor_cores / 2 | int }}"
+
+- name: Check if bios.bin is created
+  stat:
+    path: "{{ seabios_source_dir }}/seabios/out/bios.bin"
+  register: seabios_bios_bin
+
+- name: Update SeaBios config and generate customized bios
+  block:
+    - name: Create SeaBios .config file
+      lineinfile:
+        path:  "{{ seabios_source_dir }}/seabios/.config"
+        regexp: '^CONFIG_XEN=y$'
+        line: 'CONFIG_XEN=n'
+        state: present
+        create: true
+
+    - name: Update to Python3 version in SeaBios Makefile
+      replace:
+        path: "{{ seabios_source_dir }}/seabios/Makefile"
+        regexp: '^PYTHON=python2$'
+        replace: 'PYTHON=python3'
+
+    - name: Make SeaBios after updates
+      make:
+        chdir: "{{ seabios_source_dir }}/seabios"
+        params:
+          NUM_THREADS: "{{ ansible_processor_cores / 2 | int }}"
+
+    - name: Check of Qemu bios.bin file exists
+      stat:
+        path: /usr/share/qemu/bios.bin
+      register: qemu_bios_bin
+
+    - name: Check if Qemu bios-256k.bin file exists
+      stat:
+        path: /usr/share/qemu/bios-256k.bin
+      register: qemu_bios_256k_bin
+
+    - name: Backup and Copy bios files
+      block:
+        - name: Backup Qemu BIOS files
+          copy:
+            src: "{{ item.src }}"
+            dest: "{{ item.dest }}"
+            remote_src: true
+          loop:
+            - { src: "/usr/share/qemu/bios.bin", dest: "/usr/share/qemu/bios.bin_back" }
+            - { src: "/usr/share/qemu/bios-256k.bin", dest: "/usr/share/qemu/bios-256k.bin_back" }
+
+        - name: Copy custom SeaBios bios files to Qemu
+          copy:
+            src: "{{ seabios_source_dir }}/seabios/out/bios.bin"
+            dest: "{{ item }}"
+            remote_src: true
+          loop:
+            - "/usr/share/qemu/bios.bin"
+            - "/usr/share/qemu/bios-256k.bin"
+
+        #- TO DO: Add hash verification task here
+
+      when:
+        - qemu_bios_bin.stat.exists | bool
+        - qemu_bios_256k_bin.stat.exists | bool
+
+  when: seabios_bios_bin.stat.exists | bool
+
+
+

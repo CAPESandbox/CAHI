@@ -1,0 +1,44 @@
+---
+# libunwind is a prerequisite to gperftools (tcmalloc)
+- name: Ensure libunwind is installed
+  apt:
+    name: libunwind-dev
+    state: present
+
+# Install gperftools (tcmalloc) since nginx sources are
+# built with --with-google_perftools_module.
+# This should improve (memory) performance of nginx.
+- name: Download and unzip gperftools (tcmalloc) source code
+  unarchive:
+    src: "{{ gperftools_download_url }}"
+    dest: "{{ gperftools_source_code_dir }}"
+    remote_src: true
+
+- name: Configure gperftools (tcmalloc) source code
+  command:
+    cmd: ./configure 
+    chdir: "{{ gperftools_source_code_dir }}/gperftools-{{ gperftools_version }}"
+    creates: "{{ gperftools_source_code_dir }}/gperftools-{{ gperftools_version }}/config.log"
+
+- name: Check if gperftools (tcmalloc) is already built
+  stat:
+    path: "{{ gperftools_source_code_dir }}/gperftools-{{ gperftools_version }}/config.log"
+  register: gperftools_config_log
+
+- name: Build gperftools (tcmalloc) source code
+  make:
+    chdir: "{{ gperftools_source_code_dir }}/gperftools-{{ gperftools_version }}"
+    #when: not gperftools_config_log and not gperftools_config_log.stat.exists | bool
+
+- name: Check if gperftools (tcmalloc) is already installed
+  stat:
+    path: /usr/local/include/gperftools/tcmalloc.h
+  register: gperftools_installed
+
+# Consider changing below to use checkinstall via command module
+# which is not so ansible best-practices
+- name: Install gperftools (tcmalloc)
+  make:
+    chdir: "{{ gperftools_source_code_dir }}/gperftools-{{ gperftools_version }}"
+    target: install
+ # when: not gperftools_installed and not gperftools_installed.stat.exists | bool

@@ -1,0 +1,133 @@
+---
+- name: Install and configure Tuned
+  block:
+    - name: Install Tuned
+      apt:
+        name: tuned
+        state: present
+
+    - name: Inventory system services
+      service_facts: null
+
+    - name: Start and enable tuned service
+      systemd:
+        name: tuned.service
+        state: started
+        enabled: true
+      register: tuned_service_start
+      when: ansible_facts.services['tuned.service'] is defined
+
+    - name: Set tuned active profile
+      command:
+        cmd: "/usr/sbin/tuned-adm profile {{ tuned_profile }}"
+      changed_when: false
+  when: tuned_enable | bool
+
+- name: Tune kernel paramaters
+  sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    state: present
+    reload: true
+    sysctl_set: true
+  loop: "{{ kernel_tune_params }}"
+
+- name: Tune kernel network paramaters
+  sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    state: present
+    reload: true
+    sysctl_set: true
+  loop: "{{ network_tune_params }}"
+
+- name: Tune kernel filesystem paramaters
+  sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    state: present
+    reload: true
+    sysctl_set: true
+  loop: "{{ filesystem_tune_params }}"
+
+- name: Tune kernel memory paramaters
+  sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    state: present
+    reload: true
+    sysctl_set: true
+  loop: "{{ memory_tune_params }}"
+
+- name: Tune File Descriptors limits
+  lineinfile:
+    path: /etc/security/limits.conf
+    line: "{{ cape_user | default('elasticsearch', true) }}    {{ item }}       {{ file_descriptor_limits['name'] }}          {{ file_descriptor_limits['value'] }}"
+    state: present
+    insertbefore: "^# End of file"
+    owner: root
+    group: root
+    mode: 0644
+  loop:
+    - soft
+    - hard
+
+- name: Tune Number of Threads limits
+  lineinfile:
+    path: /etc/security/limits.conf
+    line: "{{ cape_user | default('elasticsearch', true) }}    {{ item }}       {{ number_of_threads_limits['name'] }}           {{ number_of_threads_limits['value'] }}"
+    insertbefore: "^# End of file"
+    owner: root
+    group: root
+    mode: 0644
+  loop:
+    - soft
+    - hard
+
+- name: Tune Memory Lock limits
+  lineinfile:
+    path: /etc/security/limits.conf
+    line: "{{ cape_user | default('elasticsearch', true) }}    {{ item }}       {{ memory_lock_limits['name'] }}         {{ memory_lock_limits['value'] }}"
+    state: present
+    insertbefore: "^# End of file"
+    owner: root
+    group: root
+    mode: 0644
+  loop:
+    - soft
+    - hard
+
+- name: Tune Maximum File Size limits
+  lineinfile:
+    path: /etc/security/limits.conf
+    line: "{{ cape_user | default('elasticsearch', true) }}    {{ item }}       {{ file_size_limits['name'] }}           {{ file_size_limits['value'] }}"
+    state: present
+    insertbefore: "^# End of file"
+    owner: root
+    group: root
+    mode: 0644
+  loop:
+    - soft
+    - hard
+
+# Setting nproc in /etc/security/limits.conf has no effect in Red Hat Enterprise Linux
+# https://access.redhat.com/solutions/146233
+
+- name: Template security limits configuration to /etc/security/limits.d/
+  template:
+    src: 90-tune.conf.j2
+    dest: /etc/security/limits.d/90-tune.conf
+    backup: true
+    owner: root
+    group: root
+    mode: 0640
+
+- name: Add pam_limits.so to PAM login
+  lineinfile:
+    path: /etc/pam.d/login
+    line: "session    required     pam_limits.so"
+    state: present
+    insertbefore: "^# End of file"
+    owner: root
+    group: root
+    mode: 0644

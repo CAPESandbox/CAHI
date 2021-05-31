@@ -1,0 +1,9 @@
+---
+- name: Remove older libervirt versions
+  apt:
+    name: "{{ item }}"
+    state: absent
+  loop:
+    - libvirt0
+    - libvirt-bin
+    - libvirt-

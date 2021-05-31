@@ -1,0 +1,31 @@
+[Unit]
+Description=High-performance, schema-free document-oriented database
+Wants=network.target
+After=network.target
+
+[Service]
+PermissionsStartOnly=true
+ExecStart=/usr/bin/numactl --interleave=all /usr/bin/mongod
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=always
+{% if ansible_os_family is match("Debian") %}
+User=mongodb
+Group=mongodb
+{% elif ansible_os_family is match("RedHat") %}
+User=mongod
+Group=mongod
+{% endif %}
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=mongodb
+LimitFSIZE=infinity
+LimitCPU=infinity
+LimitAS=infinity
+LimitNOFILE=64000
+LimitNPROC=64000
+LimitMEMLOCK=infinity
+TasksMax=infinity
+TasksAccounting=false
+
+[Install]
+WantedBy=multi-user.target

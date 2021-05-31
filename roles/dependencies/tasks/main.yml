@@ -1,0 +1,61 @@
+---
+- name: Update packages to lastest version
+  apt:
+    upgrade: dist
+    update_cache: true
+    cache_valid_time: 3600
+
+# This takes forever to complete!
+# locale_gen must be supplied an item not a list
+#- name: Configure UTF locales
+#  locale_gen:
+#    name: "{{ item }}"
+#    state: present
+#  loop: "{{ utf_locales }}"
+
+#- name: Ensure locales are updated
+#  command: /usr/sbin/update-locale
+
+# Installing a lang will also instatll its UTF and generate locales
+# We exclude GNOME and KDE packs.
+# This is supposed to be the 'Ubuntu way' of doing it?
+- name: Install language packs
+  apt:
+    name: "{{ language_packages }}"
+    state: present
+
+- name: Install and register Canonical LivePatch
+  block:
+    - name: Install Canonical LivePatch
+      snap:
+        name: canonical-livepatch
+        state: present
+        classic: false
+    
+    - name: Register Canonical LivePatch
+      command:
+        cmd: "canonical-livepatch enable {{ livepatch_apitoken }}"
+        no_log: true
+  when: livepatch_enable | bool and livepatch_apitoken | bool
+
+- name: Install CAPE dependencies apt packages
+  apt:
+    name: "{{ packages }}"
+    state: present
+    update_cache: false
+
+- name: Ensure pip is updated to latest
+  pip:
+    name: pip
+    state: latest
+    executable: pip3
+
+- name: Copy pip requirements file
+  copy:
+    src: requirements.txt
+    dest: /tmp/requirements.txt
+
+- name: Install CAPE dependencies pip packages
+  pip:
+    requirements: /tmp/requirements.txt
+    executable: pip3

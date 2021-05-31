@@ -1,0 +1,144 @@
+---
+tuned_enable: true
+tuned_profile: throughput-performance
+
+network_tune_params:
+  # Disable IPv6.
+  #- name: net.ipv6.conf.all.disable_ipv6
+  #  value: 1
+  #- name: net.ipv6.conf.default.disable_ipv6
+  #  value: 1
+  #- name: net.ipv6.conf.lo.disable_ipv6
+  #  value: 1
+  # Set default and maximum socket receive (Rx - inbound) buffer for
+  # all protocols. Measured in bytes.
+  - name: net.core.rmem_default
+    value: 31457280
+  - name: net.core.rmem_max
+    value: 12582912
+  # Set default and maximum socket transmit (Tx - ourbound) buffer for
+  # all protocols. Measured in bytes.
+  - name: net.core.wmem_default
+    value: 31457280
+  - name: net.core.wmem_max
+    value: 12582912
+  # Increase maximum socket backlog (queue) for accepting new TCP connections 
+  # when there are many exisitng ones or app is slow in processing client requests.
+  - name: net.core.somaxconn
+    value: 65535
+  # Increase maximum ancillary (extra structures relating to usage of the socket) 
+  # buffer size allowed per socket. Ex.: BPF
+  - name: net.core.optmem_max
+    value: 25165824
+  # Set number of pages allowed for queueing TCP sockets
+  # (min, pressure, max) measured in pages where page is 4096
+  - name: net.ipv4.tcp_mem
+    value: "65536 131072 262144"
+  # Set number of pages allowed for queueing UDP sockets
+  # (min, pressure, max) measured in pages where page is 4096
+  - name: net.ipv4.udp_mem
+    value: "65536 131072 262144"
+  # Set socket receive buffer memory (autotuning) used by TCP sockets
+  # (min, default, max) measured in byte, increase by factor of 4.
+  - name: net.ipv4.tcp_rmem
+    value: "8192 87380 16777216"
+  # Set socket receive buffer memory used by UDP sockets.
+  - name: net.ipv4.udp_rmem_min
+    value: 16384
+  # Set amount of memory reserved for transmit (autotuning) buffers for TCP sockets
+  # (min, default, max)
+  - name: net.ipv4.tcp_wmem
+    value: "8192 65536 16777216"
+  # Set socket transmit buffer memory used by UDP sockets.
+  - name: net.ipv4.udp_wmem_min
+    value: 16384
+# Increase tcp-time-wait buckets pool size for simultaneous TCP sockets
+  # helps in preventing simple DoS attacks.
+  - name: net.ipv4.tcp_max_tw_buckets
+    value: 1440000
+  # Disable tcp_slow_start_after_idle to time out congestion window after idle period (RTO).
+  # Keeping it enabled negatively impacts long-lived connections (i.e.: SSL) and reduces
+  # cwnd on idle connections.
+  - name: net.ipv4.tcp_slow_start_after_idle
+    value: 0
+  # Set/Enable Early Retransmit to allow connections with packet reording 
+  # trigger fast retransmit and bypass Retransmition Timeout (RTO).
+  - name: net.ipv4.tcp_early_retrans
+    value: 1
+  # Allow host to quickly reuse same sockets for new outbound connections
+  # May break TCP/IP if host is connected LB/FW.
+  - name: net.ipv4.tcp_tw_reuse
+    value: 1
+  # Increase the allowed TCP/UDP port (local) numbers to be used.
+  # first number is the first port allowed, the second number is the last port
+  # Use different parity (one even and one odd values).
+  - name: net.ipv4.ip_local_port_range
+    value: "1024 65023"
+  # Set the length of time an orphand connection (not associated to a file descriptor) 
+  # will remain in FIN_WAIT_2 state   # before it is aborted by the local host. Measured in seconds.
+  - name: net.ipv4.tcp_fin_timeout
+    value: 10
+  - name: net.ipv4.tcp_max_orphans
+    value: 60000
+  # Increase number of incoming connections backlog queue 
+  # Sets the maximum number of packets, queued on the INPUT side, when interface 
+  # receives packets faster thankernel can process them.
+  - name: net.core.netdev_max_backlog
+    value: 65536
+  # Enable BBR. Requires Linux Kernel 4.9+
+  - name: net.core.default_qdisc
+    value: fq
+  - name: net.ipv4.tcp_congestion_control
+    value: bbr
+
+kernel_tune_params:
+  - name: kernel.randomize_va_space
+    value: 2
+
+filesystem_tune_params:
+  # Increase allowed maximum for file handles
+  - name: fs.file-max
+    value: 2097152
+  # Increase allowed maximum for monitored files
+  - name: fs.inotify.max_user_watches
+    value: 131072
+  # Increase queue size for monitored files
+  - name: fs.inotify.max_queued_events
+    value: 131072
+  # Increase allowed maximum monitor file watchers
+  - name: fs.inotify.max_user_instances
+    value: 512
+  
+memory_tune_params:
+  # https://www.elastic.co/guide/en/elasticsearch/reference/current/setup-configuration-memory.html#swappiness
+  - name: vm.swappiness
+    value: 1
+  # Set the maximum number of memory map areas a process may have.
+  # While ES deb/rpm set these during installation, we configure it here
+  # https://elastic.co/guide/en/elasticsearch/reference/current/vm-max-map-count.html
+  - name: vm.max_map_count
+    value: 262144
+  # Percentage of dirty system memory before committing everything
+  - name: vm.dirty_ratio
+    value: 80
+  # Percentage of dirty system memory before flushing
+  - name: vm.dirty_background_ratio
+    value: 40
+
+# Number of Threads > https://www.elastic.co/guide/en/elasticsearch/reference/current/max-number-of-threads.html
+# File Descriptors  > https://www.elastic.co/guide/en/elasticsearch/reference/current/file-descriptors.html
+file_descriptor_limits:
+  name: nofile
+  value: 65535
+
+number_of_threads_limits:
+  name: nproc
+  value: 4096
+
+memory_lock_limits:
+  name: memlock
+  value: unlimited
+
+file_size_limits:
+  name: fsize
+  value: unlimited
