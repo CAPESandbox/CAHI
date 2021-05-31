@@ -4,7 +4,7 @@
     - name: Add MaxMind repository
       apt_repository:
         repo: "ppa:maxmind/ppa"
-        codename: focal
+        codename: "{{ ansible_distribution_release }}"
 
     - name: Install MaxMind packages
       apt:
