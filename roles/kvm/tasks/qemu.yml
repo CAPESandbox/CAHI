@@ -40,7 +40,7 @@
     src: control.j2
     dest: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}-build/DEBIAN/control"
 
-- name: Make Qemu source control
+- name: Make Qemu source code
   make:
     chdir: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}"
     target: install

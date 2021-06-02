@@ -26,7 +26,7 @@ $ pip3 install ansible==2.9.22 molecule molecule[podman] podman python-vagrant m
 Start developing!
 
 ```bash
-$ git clone https://github.com/kevoreilly/CAHI.git
+$ git clone https://github.com/CAPESandbox/CAHI.git
 $ cd CAHI
 $ molecule converge --scenario-name cape-pod
 ```

@@ -195,5 +195,59 @@ qemu_build_config_options:
 seabios_repo_url: https://github.com/coreboot/seabios.git
 seabios_source_dir: /tmp
 
-libvirt_version: 7.3.0
+libvirt_version: 7.4.0
 libvirt_download_url: https://libvirt.org/sources
+libvirt_source_dir: /tmp
+libvirt_apt_packages:
+  - apparmor-profiles
+  - apparmor-profiles-extra
+  - apparmor-utils
+  - bash-completion
+  - dmidecode
+  - dnsmasq
+  - ebtables
+  - gnutls-bin
+  - gnutls-dev
+  - iptables
+  - libapparmor-dev
+  - libapparmor-perl
+  - libdevmapper-dev
+  - libglib2.0-dev
+  - libnl-3-dev
+  - libnl-route-3-dev
+  - libnuma-dev
+  - libosinfo-1.0-dev
+  - libpciaccess-dev
+  - librbd-dev
+  - libreadline-dev
+  - libsdl1.2-dev
+  - libtirpc-dev
+  - libxml2-dev
+  - libxml2-utils
+  - libyajl-dev
+  - lvm2
+  - mlocate
+  - numactl
+  - numad
+  - python3-apparmor
+  - python3-dev
+  - python3-docutils
+  - python3-pip
+  - unzip
+  - xsltproc
+libvirt_pip_packages:
+  - ipaddr
+  - ninja
+  - flake8
+  - meson==0.57.2
+
+libvirt_meson_build_options:
+  - "system=true"
+  - "driver_remote=enabled"
+  - "driver_qemu=enabled"
+  - "driver_libvirtd=enabled"
+  - "qemu_group=libvirt"
+  - "qemu_user=root"
+  - "secdriver_apparmor=enabled"
+  - "apparmor_profiles=true"
+  - "bash_completion=auto"

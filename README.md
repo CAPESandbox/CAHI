@@ -1,6 +1,6 @@
 # Introduction
 
-CAHI (CAPE Auto-Hardened Installer) a companion set of dedicated Ansible roles and tasks to build as secured and production-ready CAPE Sandbox local instance as possible. Majority of roles and tasks are ported from [cape2.sh](https://github.com/doomedraven/Tools/blob/master/Sandbox/cape2.sh) and [kvm-qemu.sh](https://github.com/doomedraven/Tools/blob/master/Virtualization/kvm-qemu.sh). In addition, many of the anti-vm baked into the hypervisor is being randomized at run time as opposed to hardcoding values.
+CAHI (CAPE Auto-Hardened Installer) is a companion set of dedicated Ansible roles and tasks to build as secured and production-ready CAPE Sandbox local instance as possible. Majority of roles and tasks are ported from [cape2.sh](https://github.com/doomedraven/Tools/blob/master/Sandbox/cape2.sh) and [kvm-qemu.sh](https://github.com/doomedraven/Tools/blob/master/Virtualization/kvm-qemu.sh). In addition, many of the anti-vm baked into the hypervisor is being randomized at run time as opposed to hardcoding values.
 
 **NOTE:** The project is currently in a pre-alpha state and is aimed towards developers at this stage until it is more complete. Content and functionality may be added or removed with no prior notification. DO NOT RUN this against any production systems.
 
@@ -16,7 +16,7 @@ The ultimate goal to make CAPE a Configuration-As-Code (or Infrastructure-As-Cod
 
 It means that the Ansible roles and tasks are built with security in mind. For example, best practices and hardening of the operating system, web server, database, etc. are implemented in an automated fashion to ensure a secured and functional CAPE instance is being deployed. Implementing security and hardening from the get go while ensuring functionality is a considerable challenge, and automating these is a continuous effort.
 
-What 'Auto-Hardened' does NOT mean is that the resulting host will be unbreakable or unhackable. Risk cannot be eliminated, but we can reduce the attack surface as much as possible, resulting in a better and sustainable security posture (we are infosec folks after all) and in some cases, compliance. Designing a secure architecture that meets your standards is your responsibility and not the roles and tasks within this project.
+What 'Auto-Hardened' does NOT mean is that the resulting host will not be unbreakable or unhackable. Risk cannot be eliminated, but we can reduce the attack surface as much as possible, resulting in a better and sustainable security posture (we are infosec folks after all) and in some cases, compliance. Designing a secure architecture that meets your standards is your responsibility and not the roles and tasks within this project.
 
 The project tracks security and hardening configurations that are automated, which will be made available in Security Automation Tracker.
 

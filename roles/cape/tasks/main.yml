@@ -38,10 +38,7 @@
     value: "postgresql://{{ cape_user }}:{{ cape_pass }}@localhost:5432/{{ cape_user }}"
     backup: true
 
-# Future consideration: Make virtualization backend
-# a variable to allow other platforms. Currently
-# only KVM is officially supported.
-- name: Configure CAPE virtualization backend
+- name: Configure CAPE hypervisor backend
   ini_file:
     path: "{{ cape_main_dir }}/CAPEv2/conf/cuckoo.conf"
     section: cuckoo

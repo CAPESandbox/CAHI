@@ -35,13 +35,13 @@ The following dependencies are required
   - Docker (podman should work but not tested yet)
 
  ```bash
- $ pip3 install ansible==2.9.20 molecule[docker] ansible-lint --user
+ $ pip3 install ansible==2.9.21 molecule[docker] ansible-lint --user
  ```
 
 Afterwards, clone CAHI repoistory and enter the newly created directory
 
 ```bash
- $ git clone https://github.com/kevoreilly/CAHI.git
+ $ git clone https://github.com/CAPESandbox/CAHI.git
  $ cd CAHI
 ```
 
@@ -93,26 +93,32 @@ Installing remaining requirements
 
 ```bash
 $ wget 
-$ pip3 install ansible==2.9.20 molecule python-vagrant molecule-vagrant ansible-lint --user
+$ pip3 install ansible==2.9.21 molecule python-vagrant molecule-vagrant ansible-lint --user
 ```
 
 Afterwards, clone CAHI repoistory and enter the newly created directory
 
 ```bash
- $ git clone https://github.com/kevoreilly/CAHI.git
+ $ git clone https://github.com/CAPESandbox/CAHI.git
  $ cd CAHI
 ```
 
 Finally, fire up a development VM by explicitly specifiying the vagrant scenario
 
 ```bash
-$ molecule converge --scenario-name vagrant
+$ molecule converge --scenario-name cape-vm
 ```
 
 Once all roles and tasks finished, you can login to the container instance
 
 ```bash
-$ molecule login -s vagrant
+$ molecule login --scenario-name cape-vm
+```
+
+To destroy this scenario
+
+```bash
+$ molecule destroy --scenario-name cape-vm
 ```
 
 ## Development Cheatsheets

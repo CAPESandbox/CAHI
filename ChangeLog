@@ -1,3 +1,13 @@
+2020-06-02
+
+  -- Task: Complete SeaBios deployment tasks.
+  -- Task: Complete ModSecurity for NGINX tasks.
+  -- Task: Initial libvirt tasks.
+  -- Task: Add hypervisor packages pinning.
+  -- Task: Automate codename in 'maxmind' when it was hardcoded (doomedraven).
+  -- Hardening: Complete ModSecurity for NGINX setup automation.
+  -- Docs: General documentation updates.
+
 2021-05-31
   -- Role: Progress in KVM / Qemu / Seabios / anti-vm setup role.
   -- Task: Include additional anti-vm not in kvm-qemu.sh.

@@ -55,12 +55,15 @@
     chdir: "{{ nginx_source_code_dir }}/nginx-{{ nginx_version }}"
     creates: "{{ nginx_sbin_dir }}/nginx"
 
-- name: Symlink NGINX modules to /etc/nginx/modules
+# This is the directory configured during
+# compile time, which will include ModSecurity
+# module.
+- name: Create Nginx modules directory
   file:
-    src: "{{ nginx_modules_dir }}"
-    dest: /etc/nginx/modules
-    state: link
-    force: true
+    path: "{{ nginx_modules_dir }}"
+    state: directory
+    owner: root
+    group: root
 
 - name: Create NGINX cache directories
   file:
@@ -99,6 +102,14 @@
     - "{{ nginx_http_proxy_temp_dir }}"
     - "{{ nginx_http_scgi_temp_dir }}"
     - "{{ nginx_http_uwsgi_temp_dir }}"
+
+# Move task after creating required NGIX directories (modules)
+- name: Symlink NGINX modules to /etc/nginx/modules
+  file:
+    src: "{{ nginx_modules_dir }}"
+    dest: /etc/nginx/modules
+    state: link
+    force: true
 
 - name: Setup NGINX demo self-signed certificate
   block:
@@ -163,3 +174,6 @@
   template:
     src: 50x.html.j2
     dest: "{{ nginx_prefix }}/html/50x.html"
+
+- name: Include ModSecurity setup tasks
+  include_tasks: modsecurity.yml
