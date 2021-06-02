@@ -2,9 +2,12 @@
 
 Currently, the following secure configurations are either under active automation development or being considered for the future iterations.
 
-- CIS (Center of Information Security) Benchmarks for the host running CAPE. These include Ubuntu and NGINX benchmarks.
-- ModSecurity WAF for NGINX.
-- [NGINX Ultimate Bad Bot Blocker](https://github.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker).
+| Security Feature Automation                                | Status                  |
+|------------------------------------------------------------|-------------------------|
+| ModSecurity WAF for NGINX                                  | Completed               |
+| Fail2ban                                                   | Completed, Under Review |
+| CIS (Center of Information Security) Benchmarks for NGINX  | Completed, Under Review |
+| CIS (Center of Information Security) Benchmarks for Ubuntu | Brainstorming           |
 
 ## CIS (Center of Information Security) Benchmarks Automation Tracker
 
@@ -42,10 +45,3 @@ Coming Soon.
 | 5.3.3   | Ensure the X-XSS-Protection Header is enabled and configured properly         | Scored     | :heavy_check_mark: |
 | 5.3.4   | Ensure that Content Security Policy (CSP) is enabled and configured properly  | Not Scored | :heavy_check_mark: |
 
-### ModSecurity WAF for NGINX
-
-Under development.
-
-### NGINX Ultimate Bad Bot Blocker
-
-Under development.

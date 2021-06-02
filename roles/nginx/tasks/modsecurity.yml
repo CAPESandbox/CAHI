@@ -1,0 +1,141 @@
+---
+- name: Install ModSecurity apt dependencies
+  apt:
+    name: "{{ modsecurity_apt_packages }}"
+    state: present
+
+# single_branch is added in Ansible 2.11
+# Refactor after Ansible upgrade
+- name: Clone ModSecurity repository
+  git:
+    repo: "{{ modsecurity_repo_url }}/ModSecurity"
+    dest: "{{ modsecurity_source_dir }}/ModSecurity"
+    version: v3/master
+    depth: 1
+    force: true
+
+- name: Initializae and update ModSecurity submodules
+  command:
+    cmd: "{{ item }}"
+    chdir: "{{ modsecurity_source_dir }}/ModSecurity"
+  loop:
+    - git submodule init
+    - git submodule update
+
+- name: Build and configure ModSecurity
+  command:
+    cmd: "{{ item }}"
+    chdir: "{{ modsecurity_source_dir }}/ModSecurity"
+  loop:
+    - "./build.sh"
+    - "./configure"
+
+- name: Make ModeSecurity source code
+  make:
+    chdir: "{{ modsecurity_source_dir }}/ModSecurity"
+    params:
+      NUM_THREADS: "{{ ansible_processor_cores / 2 | int }}"
+
+- name: Install ModSecurity
+  command:
+    cmd: checkinstall -D --pkgname="ModSecurity" --default
+    chdir: "{{ modsecurity_source_dir }}/ModSecurity"
+
+- name: Clone ModSecurity for NGINX repository
+  git:
+    repo: "{{ modsecurity_repo_url }}/ModSecurity-nginx.git"
+    dest: "{{ modsecurity_source_dir }}/ModSecurity-nginx"
+    depth: 1
+    force: true
+
+- name: Check if NGINX source code exists
+  stat:
+    path: "{{ nginx_source_code_dir }}/nginx-{{ nginx_version }}"
+  register: nginx_source
+
+- name: Download and unzip NGNIX source code
+  unarchive:
+    src: "{{ nginx_url }}/nginx-{{ nginx_version }}.tar.gz"
+    dest: "{{ nginx_source_code_dir }}"
+    remote_src: true
+  when:
+    - not nginx_source.stat.isdir is defined
+    - not nginx_source.stat.isdir
+
+- name: Configure NGINX to generate ModSecurity-NGINX modules
+  command:
+    cmd: "./configure --with-compat --add-dynamic-module={{ modsecurity_source_dir }}/ModSecurity-nginx"
+    chdir: "{{ nginx_source_code_dir }}/nginx-{{ nginx_version }}"
+
+- name: Make NGINX to generate ModSecurity-NGINX modules
+  make:
+    chdir: "{{ nginx_source_code_dir }}/nginx-{{ nginx_version }}"
+    target: modules
+    params:
+      NUM_THREADS: "{{ ansible_processor_cores / 2 | int }}"
+
+- name: Verify ModSecurity-NGINX module created
+  stat:
+    path: "{{ nginx_source_code_dir }}/nginx-{{ nginx_version }}/objs/ngx_http_modsecurity_module.so"
+  register: modsecurity_nginx_module
+
+- name: Copy ModSecurity-NGIX module to NGINX modules directory
+  copy:
+    src: "{{ nginx_source_code_dir }}/nginx-{{ nginx_version }}/objs/ngx_http_modsecurity_module.so"
+    dest: "{{ nginx_modules_dir }}/"
+    remote_src: true
+  when: modsecurity_nginx_module.stat.exists | bool
+
+- name: Create ModSecurity-NGINX configuration directory
+  file:
+    path: "{{ modsecurity_conf_dir }}/modsec"
+    state: directory
+  register: modsecurity_nginx_conf_dir
+
+- name: Download ModSecurity configuration file
+  get_url:
+    url: "{{ modsecurity_conf_url }}"
+    dest: "{{ modsecurity_conf_dir }}/modsec/modsecurity.conf"
+  when: modsecurity_nginx_conf_dir is success
+
+- name: Copy ModSecurity unicode mapping to ModSecurity-NGINX configuration directory
+  copy:
+    src: "{{ modsecurity_source_dir }}/ModSecurity/unicode.mapping"
+    dest: "{{ modsecurity_conf_dir }}/modsec"
+    remote_src: true
+  when: modsecurity_nginx_conf_dir is success
+
+- name: Update ModSecurity configuration to prevention mode
+  replace:
+    path: "{{ modsecurity_conf_dir }}/modsec/modsecurity.conf"
+    regexp: '^SecRuleEngine\sDetectionOnly$'
+    replace: 'SecRuleEngine On'
+
+- name: Add ModSecurity main configuration file
+  lineinfile:
+    path: "{{ modsecurity_conf_dir }}/modsec/main.conf"
+    line: 'Include "{{ modsecurity_conf_dir }}/modsec/modsecurity.conf"'
+    create: true
+
+# NGINX loads modules from /usr/share/nginx/modules/
+# despite being cutomized and default being /etc/nginx/modules
+# /usr/share/nginx/modules/ngx_http_modsecurity_module.so: cannot open shared object file: No such file or directory
+# Revisit for correct and final modules directory
+- name: Update NGINX configurations to load ModSecurity module
+  lineinfile:
+    path: "{{ nginx_conf_dir }}/nginx.conf"
+    line: "load_module {{ nginx_modules_dir }}/ngx_http_modsecurity_module.so;"
+    state: present
+    insertbefore: BOF
+
+- name: Update NGINX configurations to enable ModSecurity
+  lineinfile:
+    path: "{{ nginx_conf_dir }}/nginx.conf"
+    line: "{{ item }}"
+    state: present
+    insertbefore: '^(\s+)listen\s+80;$'
+  loop:
+    - "        modsecurity on;"
+    - "        modsecurity_rules_file {{ modsecurity_conf_dir }}/modsec/main.conf;"
+  notify:
+    - Restart and enable Nginx service

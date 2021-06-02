@@ -34,7 +34,7 @@ halo 0.0.31 requires colorama>=0.3.9, but you have colorama 0.3.7 which is incom
 
 Currently ```git+https://github.com/CAPESandbox/peepdf.git``` is temporarly not installed by Ansible and should be installed manually.
 
-Error 3:
+## Error 3:
 
 When installing ```git+https://github.com/andreasvc/pyre2.git```, another dependency conflict occurs
 

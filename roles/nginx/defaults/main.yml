@@ -18,6 +18,9 @@ nginx_user: www-data
 nginx_group: www-data
 nginx_prefix: /usr/share/nginx
 nginx_sbin_dir: /usr/sbin
+# NGINX loads modules from /usr/share/nginx/modules/
+# despite being cutomized and default being /etc/nginx/modules
+# /usr/share/nginx/modules/ngx_http_modsecurity_module.so: cannot open shared object file: No such file or directory
 nginx_modules_dir: /usr/lib/nginx/modules
 nginx_conf_dir: /etc/nginx
 nginx_pid_dir: /var/run/nginx.pid
@@ -119,3 +122,27 @@ nginx_conf_options:
     - HEAD
     - GET
     - POST
+
+##################################################
+# ModSecurity variables
+# ################################################
+modsecurity_repo_url: https://github.com/SpiderLabs
+modsecurity_conf_url: https://raw.githubusercontent.com/SpiderLabs/ModSecurity/v3/master/modsecurity.conf-recommended
+modsecurity_source_dir: /tmp
+modsecurity_conf_dir: /etc/nginx
+modsecurity_apt_packages:
+  - "apt-utils"
+  - "autoconf"
+  - "automake"
+  - "build-essential"
+  - "git"
+  - "libcurl4-openssl-dev"
+  - "libgeoip-dev"
+  - "liblmdb-dev"
+  - "libpcre++-dev"
+  - "libtool"
+  - "libxml2-dev"
+  - "libyajl-dev"
+  - "pkgconf"
+  - "wget"
+  - "zlib1g-dev"

@@ -1,9 +1,74 @@
 ---
-- name: Remove older libervirt versions
+- name: Remove installed libervirt packages
   apt:
     name: "{{ item }}"
     state: absent
   loop:
     - libvirt0
     - libvirt-bin
-    - libvirt-
+    - "libvirt-{{ libvirt_version }}"
+
+- name: Find existing libvirt libraries (lib)
+  find:
+    path: "/usr/local/lib/{{ ansible_architecture }}-linux-gnu"
+    pattern: "libvirt*.so*"
+  register: libvirt_libs
+
+- name: Find existing libvirt libraries (lib64)
+  find:
+    path: "/usr/lib64/libvirt"
+    pattern: "libvirt_*.so"
+    recurse: true
+  register: libvirt_libs64
+
+- name: Remove existing libvirt libraries (lib)
+  file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ libvirt_libs.files }}"
+
+- name: Remove existing libvirt libraries (lib64)
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop: "{{ libvirt_libs64.files }}"
+
+- name: Ensure libvirt apt dependencies are installed
+  apt:
+    name: "{{ libvirt_apt_packages }}"
+    state: present
+
+- name: Ensure libvirt pip dependencies are installed
+  pip:
+    name: "{{ libvirt_pip_packages }}"
+    executable: pip3
+
+- name: Download and unarchive libvirt source code
+  unarchive:
+    src: "{{ libvirt_download_url }}/libvirt-{{ libvirt_version }}.tar.xz"
+    dest: "{{ libvirt_source_dir }}"
+    remote_src: true
+
+- name: Configure libvirt source code
+  command:
+    cmd: "/usr/local/bin/meson build {{ ['-D '] | product(libvirt_meson_build_options) | map('join') | join(' ') }}"
+    chdir: "{{ libvirt_source_dir }}/libvirt-{{ libvirt_version }}"
+
+- name: Build libvirt source code
+  command:
+    cmd: /usr/local/bin/ninja -C build
+    chdir: "{{ libvirt_source_dir }}/libvirt-{{ libvirt_version }}"
+
+- name: Install libvirt
+  command:
+    cmd: /usr/local/bin/ninja -C build install
+    chdir: "{{ libvirt_source_dir }}/libvirt-{{ libvirt_version }}"
+
+- name: Update caching paths
+  command:
+    cmd: "{{ item }}"
+  loop:
+    - /usr/sbin/ldconfig
+    - /usr/bin/updatedb
+
+

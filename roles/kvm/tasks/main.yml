@@ -7,3 +7,11 @@
 
 - name: Include seabios setup tasks
   include_tasks: seabios.yml
+
+- name: Include libvirt setup tasks
+  include_tasks: libvirt.yml
+
+- name: Pin hypervisor packages
+  copy:
+    src: cape-hypervisor-pin
+    dest: etc/apt/preferences.d 
