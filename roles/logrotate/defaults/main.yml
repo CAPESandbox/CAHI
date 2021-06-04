@@ -1,0 +1,12 @@
+---
+logrotate_nginx_schedule: daily
+logrotate_nginx_rotate: 52
+
+logrotate_suricata_schedule: daily
+logrotate_suricata_rotate: 7
+
+logrotate_general_schedule: weekly
+logrotate_general_rotate: 7
+
+logrotate_timer_calender: daily
+logrotate_timer_accuracy: 1m

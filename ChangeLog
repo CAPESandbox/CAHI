@@ -1,4 +1,12 @@
-2020-06-02
+2021-06-04
+
+  -- Role: Complete suritcata setup role
+  -- Role: Complete logrotate setup role
+  -- Role: Complete multi-factor authentication (google-authenticator) setup role (optional).
+  -- Hardening: Add multi-factor authentication for SSH access.
+  -- Docs: Update README and Security Automation Tracker.
+
+2021-06-02
 
   -- Task: Complete SeaBios deployment tasks.
   -- Task: Complete ModSecurity for NGINX tasks.
@@ -9,6 +17,7 @@
   -- Docs: General documentation updates.
 
 2021-05-31
+
   -- Role: Progress in KVM / Qemu / Seabios / anti-vm setup role.
   -- Task: Include additional anti-vm not in kvm-qemu.sh.
   -- Development: Redefine scenarios: default, cape-vm, cape-cr, cape-pod. See below.
@@ -20,6 +29,7 @@
   -- Docs: Documentation updates.
 
 2021-05-19
+
   -- Role: Complete time syncronization.
   -- Role: Consolidate dependencies setup role.
   -- Role: Complete tuning role for CAPE (VMs/physical only, won't work on containers).

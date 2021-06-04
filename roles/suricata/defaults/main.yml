@@ -1,0 +1,28 @@
+---
+suricata_repo: "ppa:oisf/suricata-stable"
+suricata_main_dir: /etc/suricata
+suricata_default_dir: /etc/default
+suricata_bin_dir: /usr/bin
+suricata_update_bin_dir: /usr/local/bin
+
+suricata_default_config:
+  run_on_start: "no"
+  runas: "{{ cape_user }}"
+  conf_file: "{{ suricata_main_dir }}/suricata.yaml"
+  rules_path: "{{ suricata_main_dir }}/rules"
+
+suricata_config:
+  rules_path: "{{ suricata_main_dir }}/rules"
+  rules_files:
+    - suricata.rules
+  external_net: "ANY"
+  mpm_algo: hs
+  stream_depth: 0
+  request_body_limit: 0
+  response_body_limit: 0
+  unix_socket_file: /var/run/suricata/suricata-command.socket
+
+suricata_update_timer:
+  calender: "*:0/15"
+  accuracy: 1m
+

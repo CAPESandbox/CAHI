@@ -1,0 +1,10 @@
+[Unit]
+Description=Suricata Rules update service
+Wants=suricata-update.timer
+
+[Service]
+Type=oneshot
+ExecStart={{ suricata_update_bin_dir }}/suricata-update -o {{ suricata_main_dir }}/rules --no-test
+
+[Install]
+WantedBy=multi-user.target

@@ -18,7 +18,7 @@ It means that the Ansible roles and tasks are built with security in mind. For e
 
 What 'Auto-Hardened' does NOT mean is that the resulting host will not be unbreakable or unhackable. Risk cannot be eliminated, but we can reduce the attack surface as much as possible, resulting in a better and sustainable security posture (we are infosec folks after all) and in some cases, compliance. Designing a secure architecture that meets your standards is your responsibility and not the roles and tasks within this project.
 
-The project tracks security and hardening configurations that are automated, which will be made available in Security Automation Tracker.
+The project tracks security and hardening configurations that are automated, which will be made available in [Security Automation Tracker](https://github.com/CAPESandbox/CAHI/blob/master/docs/Security_Automation_Tracker.md).
 
 # Deployment for Production
 

@@ -1,0 +1,12 @@
+[Unit]
+Description=Recurring Suricata Rules Update
+Requires=suricata-update.service
+
+[Timer]
+Unit=suricata-update.service
+OnCalendar={{ suricata_update_timer['calender'] }}
+AccuracySec={{ suricata_update_timer['accuracy'] }}
+Persistent=true
+
+[Install]
+WantedBy=timers.target

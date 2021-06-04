@@ -1,0 +1,7 @@
+---
+- name: Enable and start suricata update systemd timer
+  systemd:
+    name: suricata-update.timer
+    state: started
+    enabled: true
+    daemon_reload: true

@@ -1,0 +1,13 @@
+/var/log/nginx/*.log {
+     {{ logrotate_nginx_schedule }}
+     rotate {{ logrotate_nginx_rotate }}
+     compress
+     delaycompress
+     create 0640  nginx adm
+     sharedscripts
+     postrotate
+     if [ -d /run/systemd/system ]; then
+         systemctl -q is-active nginx && systemctl kill --signal=SIGHUP nginx || true
+     fi
+     endscript
+}
