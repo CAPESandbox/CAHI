@@ -1,0 +1,11 @@
+---
+ga_bin_dir: /usr/bin
+ga_time_based: true
+ga_disallow_reuse: true
+ga_rate_limit: 3
+ga_rate_time: 30
+ga_window_size: 3
+# This is account used for SSH
+ga_user: "{{ cape_user }}"
+ga_fetch_keys: true
+ga_enforce_all: false

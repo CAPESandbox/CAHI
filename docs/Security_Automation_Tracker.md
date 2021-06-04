@@ -2,18 +2,22 @@
 
 Currently, the following secure configurations are either under active automation development or being considered for the future iterations.
 
-| Security Feature Automation                                | Status                  |
-|------------------------------------------------------------|-------------------------|
-| ModSecurity WAF for NGINX                                  | Completed               |
-| Fail2ban                                                   | Completed, Under Review |
-| CIS (Center of Information Security) Benchmarks for NGINX  | Completed, Under Review |
-| CIS (Center of Information Security) Benchmarks for Ubuntu | Brainstorming           |
+| Security Feature Automation                                | Status                       |
+|------------------------------------------------------------|------------------------------|
+| Multi-Facotr Authentication (google-authenticator) for SSH | Completed, Test/Rev Required |
+| ModSecurity WAF for NGINX                                  | Completed                    |
+| Fail2ban                                                   | Completed, Under Review      |
+| CIS (Center of Information Security) Benchmarks for NGINX  | Completed, Under Review      |
+| CIS (Center of Information Security) Benchmarks for Ubuntu | Brainstorming                |
 
 ## CIS (Center of Information Security) Benchmarks Automation Tracker
 
 ### Ubuntu
 
-Coming Soon.
+| Item    | Control                                                                       | Scored     | Automated          |
+|---------|-------------------------------------------------------------------------------|------------|--------------------|
+| 4.3     | Ensure logrotate is configured                                                | Scored     | :heavy_check_mark: |
+| 4.4     | Ensure logrotate assigns appropriate permissions                              | Scored     | :heavy_check_mark: |
 
 ### NGINX
 
@@ -44,4 +48,3 @@ Coming Soon.
 | 5.3.2   | Ensure X-Content-Type-Options header is configured and enabled                | Scored     | :heavy_check_mark: |
 | 5.3.3   | Ensure the X-XSS-Protection Header is enabled and configured properly         | Scored     | :heavy_check_mark: |
 | 5.3.4   | Ensure that Content Security Policy (CSP) is enabled and configured properly  | Not Scored | :heavy_check_mark: |
-

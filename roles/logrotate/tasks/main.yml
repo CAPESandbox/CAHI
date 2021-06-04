@@ -1,0 +1,62 @@
+---
+- name: Ensure logrotate installed
+  apt:
+    name: logrotate
+    state: present
+
+# CIS - 4.3 Ensure logrotate is configured (Manual)
+- name: List logrotate configuration files
+  find:
+    paths: /etc/logrotate.d
+    recurse: true
+  register: logrotate_confs
+
+- name: Update logrotate configuration with apporpriate permissions - rotate
+  replace:
+    path: "{{ item.path }}"
+    regexp: '^(\s+rotate\s+)\d+'
+    replace: '\g<1>{{ logrotate_general_rotate }}'
+  loop: "{{ logrotate_confs.files }}"
+
+- name: Update logrotate configuration with apporpriate permissions - schedule
+  replace:
+    path: "{{ item.path }}"
+    regexp: '^(\s+)daily|weekly|monthly$'
+    replace: '\1{{ logrotate_general_schedule }}'
+  loop: "{{ logrotate_confs.files }}"
+
+- name: Template NGINX logrotate configuration file
+  template:
+    src: nginx.conf.j2
+    dest: /etc/logrotate.d/nginx.conf
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Template Suricata logrotate configuration file
+  template:
+    src: suricata.conf.j2
+    dest: /etc/logrotate.d/suricata.conf
+    owner: root
+    group: root
+    mode: 0644
+
+# CIS - 4.4 Ensure logrotate assigns appropriate permissions (Automated)
+- name: Update logrotate configuration with apporpriate permissions
+  lineinfile:
+    path: /etc/logrotate.conf
+    regexp: '^create$'
+    line: 'create 0640 root utmp'
+
+- name: Update logratoate systemd timer
+  ini_file:
+    path: /lib/systemd/system/logrotate.timer
+    section: Timer
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+    no_extra_spaces: true
+  loop:
+    - { option: OnCalendar, value: "{{ logrotate_timer_calender }}" }
+    - { option: AccuracySec, value: "{{ logrotate_timer_accuracy }}" }
+  notify:
+    - Enable and start logrotate systemd timer

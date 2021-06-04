@@ -1,0 +1,86 @@
+---
+- name: Ensure SSH server is installed
+  apt:
+    name: openssh-server
+    state: present
+
+- name: Install google-authenticator
+  apt:
+    name: libpam-google-authenticator
+    state: present
+
+- name: Configure google-authenticator
+  command:
+    cmd: "{{ ga_bin_dir }}/google-authenticator {{ ga_time_based | ternary('-t', '-c') }} 
+          {{ ga_disallow_reuse | ternary('-d', '-D') }} -r {{ ga_rate_limit }} -R {{ ga_rate_time }} 
+          -w {{ ga_window_size }} --qr-mode=ANSI -l {{ ga_user }}
+          --secret=/home/{{ ga_user }}/.google-authenticator --force"
+    creates: "/home/{{ ga_user }}/.google-authenticator"
+
+- name: Fetch generated google-authenticatior keys to controller
+  fetch:
+    src: "/home/{{ ga_user }}/.google-authenticator"
+    dest: "files/{{ ga_user }}-google-authenticator"
+  when: ga_fetch_keys | bool
+
+# no insert / add EOF. Revist.
+#- name: Configure SSH PAM to use google-authentocator
+#  pamd:
+#    name: sshd
+#    new_type: auth
+#    new_control: required
+#    new_module_path: "/usr/lib/{{ ansible_architecture }}-linux-gnu/security/pam_google_authenticator.so"
+
+- name: Configure SSH PAM to use google-authentocator
+  lineinfile:
+    path: /etc/pam.d/sshd
+    line: "{{ item }}"
+    insertafter: EOF
+    backup: true
+    owner: root
+    group: root
+    mode: 0644
+  loop:
+    - "auth required pam_google_authenticator.so nullok"
+    - "auth required pam_permit.so"
+  when: not ga_enforce_all | bool
+
+- name: Configure SSH PAM to use google-authentocator - Enfore all
+  lineinfile:
+    path: /etc/pamd.d/sshd
+    line: "auth required pam_google_authenticator.so"
+    insertafter: EOF
+    backup: true
+    owner: root
+    group: root
+    mode: 0644
+  when: ga_enforce_all | bool
+
+- name: Configure SSH Challenge Response for google-authenticator
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^(#)?ChallengeResponseAuthentication'
+    line: 'ChallengeResponseAuthentication yes'
+    state: present
+    backup: true
+    validate: /usr/sbin/sshd -T -f %s
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - Restart SSH service
+
+# Revist to make more flexible 
+- name: Configure SSH Authentication Methods for google-authenticator
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^(#)?AuthenticationMethods'
+    line: 'AuthenticationMethods publickey,password publickey,keyboard-interactive'
+    state: present
+    backup: true
+    validate: /usr/sbin/sshd -T -f %s
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - Restart SSH service

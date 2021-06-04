@@ -1,0 +1,86 @@
+---
+- name: Add Suricata repository
+  apt_repository:
+    repo: "{{ suricata_repo }}"
+    codename: "{{ ansible_distribution_release }}"
+
+# suricata-update is bundled with Suricata 4.1 and
+# later and is normally installed with it.
+- name: Install Suricata
+  apt:
+    name: suricata
+    state: present
+    update_cache: true
+
+- name: Setup default Suricata configuration - Run On Start
+  replace:
+    path: "{{ suricata_default_dir }}/suricata"
+    regexp: '^RUN=yes$'
+    replace: 'RUN={{ suricata_default_config["run_on_start"] }}'
+
+- name: Setup default Suricata configuration - Run As User
+  replace:
+    path: "{{ suricata_default_dir }}/suricata"
+    regexp: '^RUN_AS_USER=$'
+    replace: 'RUN_AS_USER={{ suricata_default_config["runas"] }}'
+
+- name: Setup default Suricata configuration - SURCONF
+  replace:
+    path: "{{ suricata_default_dir }}/suricata"
+    regexp: '^SURCONF=.*\.yaml$'
+    replace: 'SURCONF={{ suricata_default_config["conf_file"] }}'
+
+# suricata-update update.yaml does not exist. It 
+# only exists if installed via pip.
+- name: Tempate suricate-update configuration file
+  template:
+    src: update.yaml.j2
+    dest: "{{ suricata_main_dir }}/update.yaml"
+
+# suricata-update still dumps suricata rules
+# file to /var/lib/suricata/rules/suricata.rules
+# regardless of what 'default-rule-path' is!
+# --no-test: do not run any tests yet since we
+# must update suricata config first, otherwise
+# it will fail because it is not able to find
+# suricata.rules
+- name: Update Suricata rules
+  command:
+    cmd: "{{ suricata_update_bin_dir }}/suricata-update -o {{ suricata_main_dir }}/rules --no-test"
+
+# 1) Slurping vs. Templating
+#    We can 'slurp' suricata.yaml, but it is a big file
+#    and can get too complicated too quickly, so we use
+#    templating, more cutomizations, etc.
+#    However, we must be carefule since suricata's
+#    config file contains separator/reserved characters, 
+#    such as '{%', in comments, which will result in
+#    templating failures. See line 310 and 320.
+# 2) --user root is just to make the validation 
+#    test succeed, othwerwise it will fail with
+#    permission denied
+- name: Template Suricata configuration file
+  template:
+    src: suricata.yaml.j2
+    dest: "{{ suricata_main_dir }}/suricata.yaml"
+    validate: "{{ suricata_bin_dir }}/suricata --user root -T %s"
+
+- name: Template Suricata update systemd service
+  template:
+    src: suricata-update.service.j2
+    dest: /lib/systemd/system/suricata-update.service
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Template Suricata update systemd timer
+  template:
+    src: suricata-update.timer.j2
+    dest: /lib/systemd/system/suricata-update.timer
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - Enable and start suricata update systemd timer
+
+# TODO: Add task to set proper permissions 
