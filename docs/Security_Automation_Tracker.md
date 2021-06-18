@@ -16,6 +16,29 @@ Currently, the following secure configurations are either under active automatio
 
 | Item    | Control                                                                       | Scored     | Automated          |
 |---------|-------------------------------------------------------------------------------|------------|--------------------|
+| 1.1.1.1 | Ensure mounting of cramfs filesystem is disabled                              | Scored     | :heavy_check_mark: |
+| 1.1.1.2 | Ensure mounting of freevxfs filesystem is disabled                            | Scored     | :heavy_check_mark: |
+| 1.1.1.3 | Ensure mounting of jffs2 filesystem is disabled                               | Scored     | :heavy_check_mark: |
+| 1.1.1.4 | Ensure mounting of hfs filesystem is disabled                                 | Scored     | :heavy_check_mark: |
+| 1.1.1.5 | Ensure mounting of hfsplus filesystem is disabled                             | Scored     | :heavy_check_mark: |
+| 1.1.1.6 | Ensure mounting of udf filesystem is disabled                                 | Scored     | :heavy_check_mark: |
+| 1.1.1.7 | Ensure mounting of vfat filesystem is disabled                                | Scored     | :heavy_check_mark: |
+| 1.1.23  | Disable Automounting                                                          | Scored     | :heavy_check_mark: |
+| 1.1.24  | Disable USB Storage                                                           | Scored     | :heavy_check_mark: |
+| 1.3.1   | Ensure sudo is installed                                                      | Scored     | :heavy_check_mark: |
+| 1.3.2   | Ensure sudo commands use pty                                                  | Scored     | :heavy_check_mark: |
+| 1.3.3   | Ensure sudo log file exists                                                   | Scored     | :heavy_check_mark: |
+| 1.6.2   | Ensure address space layout randomization (ASLR) is enabled                   | Scored     | :heavy_check_mark: |
+| 1.6.4   | Ensure core dumps are restricted                                              | Scored     | :heavy_check_mark: |
+| 1.8.1.1 | Ensure message of the day is configured properly                              | Scored     | :heavy_check_mark: |
+| 1.8.1.2 | Ensure local login warning banner is configured properly                      | Scored     | :heavy_check_mark: |
+| 1.8.1.3 | Ensure remote login warning banner is configured properly                     | Scored     | :heavy_check_mark: |
+| 1.8.1.4 | Ensure permissions on /etc/motd are configured                                | Scored     | :heavy_check_mark: |
+| 1.8.1.5 | Ensure permissions on /etc/issue are configured                               | Scored     | :heavy_check_mark: |
+| 1.8.1.6 | Ensure permissions on /etc/issue.net are configured                           | Scored     | :heavy_check_mark: |
+| 1.9     | Ensure updates, patches, and additional security software are installed       | Scored     | :heavy_check_mark: |
+| 4.3     | Ensure logrotate is configured                                                | Scored     | :heavy_check_mark: |
+| 4.3     | Ensure logrotate is configured                                                | Scored     | :heavy_check_mark: |
 | 4.3     | Ensure logrotate is configured                                                | Scored     | :heavy_check_mark: |
 | 4.4     | Ensure logrotate assigns appropriate permissions                              | Scored     | :heavy_check_mark: |
 
