@@ -1,0 +1,508 @@
+---
+####################################################
+# 1 Initial Setup
+#   1.1 File System Configuuration
+####################################################
+
+- name: Ensure mounting of cramfs filesystem is disabled
+  block:
+    - name: 1.1.1.1 Ensure mounting of cramfs filesystem is disabled (Scored) | Unload filesystem module
+      modprobe:
+        name: cramfs
+        state: absent
+  
+    - name: 1.1.1.1 Ensure mounting of cramfs filesystem is disabled (Scored) | Add modprobe configuration
+      lineinfile:
+        path: /etc/modprobe.d/cramfs.conf
+        line: install cramfs /bin/true
+        create: true
+        owner: root
+        group: root
+        mode: 0644
+  when: cis_disable_cramfs | bool
+  tags:
+    - level1
+    - server
+    - workstation
+    - scored
+    - disable-unused-filesystems
+
+- name: Ensure mounting of freevxfs filesystem is disabled
+  block:
+    - name: 1.1.1.2 Ensure mounting of freevxfs filesystem is disabled (Scored) | Unload filesystem module
+      modprobe:
+        name: freevxfs
+        state: absent
+
+    - name: 1.1.1.2 Ensure mounting of freevxfs filesystem is disabled (Scored) | Add modprobe configuration
+      lineinfile:
+        path: /etc/modprobe.d/freevxfs.conf
+        line: install freevxfs /bin/true
+        create: true
+        owner: root
+        group: root
+        mode: 0644
+  when: cis_disable_freevxfs | bool
+  tags:
+    - level1
+    - server
+    - workstation
+    - scored
+    - disable-unused-filesystems
+
+- name: Ensure mounting of jffs2 filesystem is disabled
+  block:
+    - name: 1.1.1.3 Ensure mounting of jffs2 filesystem is disabled (Scored) | Unload filesystem module
+      modprobe:
+        name: jffs2
+        state: absent
+
+    - name: 1.1.1.3 Ensure mounting of jffs2 filesystem is disabled (Scored) | Add modprobe configuration
+      lineinfile:
+        path: /etc/modprobe.d/jffs2.conf
+        line: install jffs2 /bin/true
+        create: true
+        owner: root
+        group: root
+        mode: 0644
+  when: cis_disable_jffs2 | bool
+  tags:
+    - level1
+    - server
+    - workstation
+    - scored
+    - disable-unused-filesystems
+
+- name: Ensure mounting of hfs filesystem is disabled
+  block:
+    - name: 1.1.1.4 Ensure mounting of hfs filesystem is disabled (Scored) | Unload filesystem module
+      modprobe:
+        name: hfs
+        state: absent
+
+    - name: 1.1.1.4 Ensure mounting of hfs filesystem is disabled (Scored) | Add modprobe configuration
+      lineinfile:
+        path: /etc/modprobe.d/hfs.conf
+        line: install hfs /bin/true
+        create: true
+        owner: root
+        group: root
+        mode: 0644
+  when: cis_disable_hfs | bool
+  tags:
+    - level1
+    - server
+    - workstation
+    - scored
+    - disable-unused-filesystems
+
+- name: Ensure mounting of hfsplus filesystem is disabled
+  block:
+    - name: 1.1.1.5 Ensure mounting of hfsplus filesystem is disabled (Scored) | Unload filesystem module
+      modprobe:
+        name: hfsplus
+        state: absent
+
+    - name: 1.1.1.5 Ensure mounting of hfsplus filesystem is disabled (Scored) | Add modprobe configuration
+      lineinfile:
+        path: /etc/modprobe.d/hfsplus.conf
+        line: install hfsplus /bin/true
+        create: true
+        owner: root
+        group: root
+        mode: 0644
+  when: cis_disable_hfsplus | bool
+  tags:
+    - level1
+    - server
+    - workstation
+    - scored
+    - disable-unused-filesystems
+
+- name: Ensure mounting of udf filesystem is disabled
+  block:
+    - name: 1.1.1.6 Ensure mounting of udf filesystem is disabled (Scored) | Unload filesystem module
+      modprobe:
+        name: udf
+        state: absent
+
+    - name: 1.1.1.6 Ensure mounting of udf filesystem is disabled (Scored) | Add modprobe configuration
+      lineinfile:
+        path: /etc/modprobe.d/udf.conf
+        line: install udf /bin/true
+        create: true
+        owner: root
+        group: root
+        mode: 0644
+  when: cis_disable_udf | bool
+  tags:
+    - level1
+    - server
+    - workstation
+    - scored
+    - disable-unused-filesystems
+
+- name: Ensure mounting of vfat filesystem is disabled
+  block:
+    - name: 1.1.1.7 Ensure mounting of vfat filesystem is disabled (Not Scored) | Unload filesystem module
+      modprobe:
+        name: vfat
+        state: absent
+
+    - name: 1.1.1.7 Ensure mounting of vfat filesystem is disabled (Not Scored) | Add modprobe configuration
+      lineinfile:
+        path: /etc/modprobe.d/vfat.conf
+        line: install vfat /bin/true
+        create: true
+        owner: root
+        group: root
+        mode: 0644
+  when: cis_disable_vfat | bool
+  tags:
+    - level2
+    - server
+    - workstation
+    - notscored
+    - disable-unused-filesystems
+
+- name: Disable Automounting
+  block:
+    - name: 1.1.23 Disable Automounting (Scored) | Disable autofs service
+      systemd:
+        name: autofs
+        state: disabled
+      when: ansible_facts.services['autofs.service'] is defined and cis_disable_automounting | bool
+      tags:
+        - level1
+        - level2
+        - server
+        - workstation
+        - scored
+        - disable-unused-filesystems
+
+    - name: 1.1.23 Disable Automounting (Scored) | Remove autofs package
+      apt:
+        name: autofs
+        state: absent
+        purge: true
+  when: cis_disable_automounting | bool
+
+- name: Disable USB Storage
+  block:
+    - name: 1.1.24 Disable USB Storage (Scored) | unload module
+      modprobe:
+        name: usb-storage
+        state: absent
+
+    - name: 1.1.24 Disable USB Storage (Scored) | Add modprobe configuration
+      lineinfile:
+        path: /etc/modprobe.d/usb-storage.conf
+        line: install usb-storage /bin/true
+        create: true
+        owner: root
+        group: root
+        mode: 0644
+  when: cis_disable_usb | bool
+  tags:
+    - level1
+    - level2
+    - server
+    - workstation
+    - scored
+    - disable-unused-filesystems
+
+####################################################
+# 1 Initial Setup
+#   1.2 Configure Software Updates
+####################################################
+
+
+####################################################
+# 1 Initial Setup
+#   1.3 Configure sudo
+####################################################
+- name: 1.3.1 Ensure sudo is installed (Scored)
+  apt:
+    name: sudo
+    state: present
+  tags:
+    - level1
+    - server
+    - workstation
+    - scored
+    - configure-sudo
+
+- name: 1.3.2 Ensure sudo commands use pty (Scored) | /etc/sudoers
+  lineinfile:
+    path: /etc/sudoers
+    regexp: '^Defaults use_pty'
+    line: 'Defaults use_pty'
+    state: present
+    validate: /usr/sbin/visudo -cf %s
+    owner: root
+    group: root
+    mode: 0440
+  tags:
+    - level1
+    - server
+    - workstation
+    - scored
+    - configure-sudo
+
+- name: 1.3.2 Ensure sudo commands use pty (Scored) | find all file under /etc/sudoers.d/
+  find:
+    path: /etc/sudoers.d
+    file_type: file
+  register: sudoers_d_files
+  tags:
+    - level1
+    - server
+    - workstation
+    - scored
+    - configure-sudo
+
+- name: 1.3.2 Ensure sudo commands use pty (Scored) | /etc/sudoers.d/*
+  lineinfile:
+    path: "{{ item.path }}"
+    regexp: '^Defaults use_pty'
+    line: 'Defaults use_pty'
+    state: present
+    validate: /usr/sbin/visudo -cf %s
+    owner: root
+    group: root
+    mode: 0440
+  loop: "{{ sudoers_d_files.files }}"
+  when: sudoers_d_files is defined and (sudoers_d_files.files | length > 0)
+  tags:
+    - level1
+    - server
+    - workstation
+    - scored
+    - configure-sudo
+
+- name: 1.3.3 Ensure sudo log file exists (Scored)
+  lineinfile:
+    path: /etc/sudoers
+    regexp: '^Defaults logfile='
+    line: 'Defaults logfile={{ os_sudo_logfile_path | quote }}'
+    state: present
+    validate: /usr/sbin/visudo -cf %s
+    owner: root
+    group: root
+    mode: 0440
+  tags:
+    - level1
+    - server
+    - workstation
+    - scored
+    - configure-sudo
+
+- name: 1.3.3 Ensure sudo log file exists (Scored) | /etc/sudoers.d/*
+  lineinfile:
+    path: "{{ item.path }}"
+    regexp: '^Defaults logfile='
+    line: 'Defaults logfile={{ os_sudo_logfile_path | quote }}'
+    state: present
+    validate: /usr/sbin/visudo -cf %s
+    owner: root
+    group: root
+    mode: 0440
+  loop: "{{ sudoers_d_files.files }}"
+  when: sudoers_d_files is defined and (sudoers_d_files.files | length > 0)
+  tags:
+    - level1
+    - server
+    - workstation
+    - scored
+    - configure-sudo
+
+####################################################
+# 1 Initial Setup
+#   1.4 Filesystem Integrity Checking
+####################################################
+
+
+####################################################
+# 1 Initial Setup
+#   1.6 Additional Process Hardening
+####################################################
+- name: 1.6.2 Ensure address space layout randomization (ASLR) is enabled (Scored)
+  sysctl:
+    name: kernel.randomize_va_space
+    value: '2'
+    state: present
+    sysctl_set: true
+    reload: true
+  tags:
+    - level1
+    - server
+    - workstation
+    - scored
+    - additional-process-hardening
+
+- name: 1.6.4 Ensure core dumps are restricted (Scored) | limits
+  lineinfile:
+    path: /etc/security/limits.conf
+    regexp: '^\* hard core 0$'
+    line: '* hard core 0'
+    insertbefore: EOF
+    owner: root
+    group: root
+    mode: 0644
+
+- name: 1.6.4 Ensure core dumps are restricted (Scored) | sysctl
+  sysctl:
+    name: fs.suid_dumpable
+    value: '0'
+    state: present
+    sysctl_set: true
+    reload: true
+  tags:
+    - level1
+    - server
+    - workstation
+    - scored
+    - additional-process-hardening
+
+- name: 1.6.4 Ensure core dumps are restricted (Scored) | systemd
+  lineinfile:
+    path: /etc/systemd/coredump.conf
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    owner: root
+    group: root
+    mode: 0644
+  loop:
+    - { regexp: "^#?Storage=", line: "Storage=none" }
+    - { regexp: "^#?ProcessSizeMax=", line: "ProcessSizeMax=0" }
+  when: ansible_facts.services['systemd-coredump@.service'] is defined
+  notify:
+    - Reload systemctl daemon
+  tags:
+    - level1
+    - server
+    - workstation
+    - scored
+    - additional-process-hardening
+
+####################################################
+# 1 Initial Setup
+#   1.8 Warning Banners
+####################################################
+
+- name: 1.8.1.1 Ensure message of the day is configured properly (Scored) | motd is not used
+  file:
+    path: /etc/motd
+    state: absent
+  when: not use_motd_message
+  tags:
+    - level1
+    - server
+    - workstation
+    - scored
+    - warning-banners
+    - cmd-warning-banners
+
+- name: 1.8.1.1 Ensure message of the day is configured properly (Scored) | Set motd message
+  template:
+    src: etc/motd.j2
+    dest: /etc/motd
+    owner: root
+    group: root
+    mode: 0644
+  when: use_motd_message | bool
+  tags:
+    - level1
+    - server
+    - workstation
+    - scored
+    - warning-banners
+    - cmd-warning-banners
+
+- name: 1.8.1.2 Ensure local login warning banner is configured properly (Scored)
+  template:
+    src: etc/issue.j2
+    dest: /etc/issue
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - level1
+    - server
+    - workstation
+    - scored
+    - warning-banners
+    - cmd-warning-banners
+
+- name: 1.8.1.3 Ensure remote login warning banner is configured properly (Scored)
+  template:
+    src: etc/issue.net.j2
+    dest: /etc/issue.net
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - level1
+    - server
+    - workstation
+    - scored
+    - warning-banners
+    - cmd-warning-banners
+
+- name: 1.8.1.4 Ensure permissions on /etc/motd are configured (Scored)
+  file:
+    path: /etc/motd
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - level1
+    - server
+    - workstation
+    - scored
+    - warning-banners
+    - cmd-warning-banners
+
+- name: 1.8.1.5 Ensure permissions on /etc/issue are configured (Scored)
+  file:
+    path: /etc/issue
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - level1
+    - server
+    - workstation
+    - scored
+    - warning-banners
+    - cmd-warning-banners
+
+- name: 1.8.1.6 Ensure permissions on /etc/issue.net are configured (Scored)
+  file:
+    path: /etc/issue.net
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - level1
+    - server
+    - workstation
+    - scored
+    - warning-banners
+    - cmd-warning-banners
+
+####################################################
+# 1 Initial Setup
+#   1.9 Updates, patches, security software
+####################################################
+
+- name: 1.9 Ensure updates, patches, and additional security software are installed (Not Scored) | All
+  apt:
+    name: '*'
+    state: latest
+    update_cache: true
+  tags:
+    - level1
+    - server
+    - workstation
+    - patches

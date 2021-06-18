@@ -1,0 +1,57 @@
+---
+#####################################################
+# OS Defaults
+#####################################################
+os_sudo_logfile_path: /var/log/sudo.log
+
+use_motd_message: true
+
+#####################################################
+# Section 1 - Filesystem Configuation Variables
+#####################################################
+cis_disable_cramfs: true
+cis_disable_freevxfs: true
+cis_disable_jffs2: true
+cis_disable_hfs: true
+cis_disable_hfsplus: true
+cis_disable_vfat: false
+cis_disable_squashfs: true
+cis_disable_udf: true
+cis_disable_automounting: true
+cis_disable_usb: false
+
+cis_disable_xinetd: true
+cis_disable_xwindow: true
+cis_disable_rsyncd: true
+cis_disable_avahi: true
+cis_disable_snmpd: true
+cis_disable_httpproxy: true
+cis_disable_smb: true
+cis_disable_imappop3: true
+cis_disable_http: true
+cis_disable_ftp: true
+cis_disable_dns: true
+cis_disable_nfs: true
+cis_disable_rpc: true
+cis_disable_ldap: true
+cis_disable_dhcp: true
+cis_disable_cups: true
+cis_disable_nis: true
+cis_disable_mta: true
+cis_disable_telnet: true
+
+#####################################################
+# Section 2 - Services
+#####################################################
+
+#####################################################
+# Section 3 Variables
+#####################################################
+
+#####################################################
+# Section 4 - Logging and Auditing
+#####################################################
+
+#####################################################
+# Section 5 Access, Authentication and Authorization
+#####################################################

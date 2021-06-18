@@ -95,7 +95,7 @@
       include_role:
         name: mfactor 
 
-# Disable inclusion of CIS role until issues are sorted out
-#    - name: Include CIS Benchmarks setup tasks
-#      include_role:
-#        name: cis
+    - name: Include CIS Benchmarks setup tasks
+      include_role:
+        name: cis
+      when: ansible_virtualization_type not in ["docker", "lxc", "openvz", "podman"]
