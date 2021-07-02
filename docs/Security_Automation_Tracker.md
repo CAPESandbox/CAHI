@@ -37,6 +37,32 @@ Currently, the following secure configurations are either under active automatio
 | 1.8.1.5 | Ensure permissions on /etc/issue are configured                               | Scored     | :heavy_check_mark: |
 | 1.8.1.6 | Ensure permissions on /etc/issue.net are configured                           | Scored     | :heavy_check_mark: |
 | 1.9     | Ensure updates, patches, and additional security software are installed       | Scored     | :heavy_check_mark: |
+| 2.1.1   | Ensure xinetd is not installed                                                | Scored     | :heavy_check_mark: |
+| 2.1.2   | Ensure openbsd-inetd is not installed                                         | Scored     | :heavy_check_mark: |
+| 2.2.1.1 | Ensure time synchronization is in use                                         | Scored     | :heavy_check_mark: |
+| 2.2.1.2 | Ensure systemd-timesyncd is configured                                        | Scored     | :heavy_check_mark: |
+| 2.2.1.4 | Ensure ntp is configured                                                      | Scored     | :heavy_check_mark: |
+| 2.2.2   | Ensure X Window System is not installed                                       | Scored     | :heavy_check_mark: |
+| 2.2.3   | Ensure Avahi Server is not installed                                          | Scored     | :heavy_check_mark: |
+| 2.2.4   | Ensure CUPS is not installed                                                  | Scored     | :heavy_check_mark: |
+| 2.2.5   | Ensure DHCP Server is not installed                                           | Scored     | :heavy_check_mark: |
+| 2.2.6   | Ensure LDAP server is not installed                                           | Scored     | :heavy_check_mark: |
+| 2.2.7   | Ensure NFS is not installed                                                   | Scored     | :heavy_check_mark: |
+| 2.2.8   | Ensure DNS Server is not installed                                            | Scored     | :heavy_check_mark: |
+| 2.2.9   | Ensure FTP Server is not installed                                            | Scored     | :heavy_check_mark: |
+| 2.2.10  | Ensure HTTP server is not installed                                           | Scored     | :heavy_check_mark: |
+| 2.2.11  | Ensure IMAP and POP3 server are not installed                                 | Scored     | :heavy_check_mark: |
+| 2.2.12  | Ensure Samba is not installed                                                 | Scored     | :heavy_check_mark: |
+| 2.2.13  | Ensure HTTP Proxy Server is not installed                                     | Scored     | :heavy_check_mark: |
+| 2.2.14  | Ensure SNMP Server is not installed                                           | Scored     | :heavy_check_mark: |
+| 2.2.16  | Ensure rsync service is not installed                                         | Scored     | :heavy_check_mark: |
+| 2.2.17  | Ensure NIS Server is not installed                                            | Scored     | :heavy_check_mark: |
+| 2.3.1   | Ensure NIS Client is not installed                                            | Scored     | :heavy_check_mark: |
+| 2.3.2   | Ensure rsh client is not installed                                            | Scored     | :heavy_check_mark: |
+| 2.3.3   | Ensure talk client is not installed                                           | Scored     | :heavy_check_mark: |
+| 2.3.4   | Ensure telnet client is not installed                                         | Scored     | :heavy_check_mark: |
+| 2.3.5   | Ensure LDAP client is not installed                                           | Scored     | :heavy_check_mark: |
+| 2.3.6   | Ensure RPC is not installed                                                   | Scored     | :heavy_check_mark: |
 | 4.3     | Ensure logrotate is configured                                                | Scored     | :heavy_check_mark: |
 | 4.3     | Ensure logrotate is configured                                                | Scored     | :heavy_check_mark: |
 | 4.3     | Ensure logrotate is configured                                                | Scored     | :heavy_check_mark: |

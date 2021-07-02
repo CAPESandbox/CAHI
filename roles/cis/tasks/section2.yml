@@ -1,0 +1,185 @@
+---
+####################################################
+# 2 Services
+#   2.1 inetd Services
+####################################################
+- name: 2.1.1 Ensure xinetd is not installed
+  apt:
+    name: xinetd
+    state: absent
+    purge: true
+  when: cis_disable_xinetd | bool
+
+- name: 2.1.2 Ensure openbsd-inetd is not installed (Automated)
+  apt:
+    name: openbsd-inetd
+    state: absent
+    purge: true
+  when: cis_disable_openbsdinted | bool
+
+####################################################
+# 2 Services
+#   2.2 Special Purpose Services
+####################################################
+- name: 2.2.2 Ensure X Window System is not installed (Automated)
+  apt:
+    name: "{{ xorg_packages }}"
+    state: absent
+    purge: true
+  when: cis_disable_xwindow | bool
+
+- name: 2.2.3 Ensure Avahi Server is not installed (Automated)
+  block:
+    - name: 2.2.3 Ensure Avahi Server is not installed (Automated) | Service
+      systemd:
+        name: avahi-daemon.service
+        state: stopped
+        enabled: false
+        masked: true
+
+    - name: 2.2.3 Ensure Avahi Server is not installed (Automated) | Pacakge
+      apt:
+        name: avahi-daemon
+        state: absent
+        purge: true
+  
+  when: ansible_facts.services['avahi-daemon.service'] is defined and cis_disable_avahi | bool
+
+- name: 2.2.4 Ensure CUPS is not installed (Automated)
+  apt:
+    name: cpus
+    state: absent
+    purge: true
+  when: cis_disable_cups | bool
+
+- name: 2.2.5 Ensure DHCP Server is not installed (Automated)
+  apt:
+    name: isc-dhcp-server
+    state: absent
+    purge: true
+  when: cis_disable_dhcp | bool
+
+- name: 2.2.6 Ensure LDAP server is not installed (Automated)
+  apt:
+    name: slapd
+    state: absent
+    purge: true
+  when: cis_disable_ldap | bool
+
+- name: 2.2.7 Ensure NFS is not installed (Automated)
+  apt:
+    name: rpcbind
+    state: absent
+    purge: true
+  when: cis_disable_nfs | bool
+
+- name: 2.2.8 Ensure DNS Server is not installed (Automated)
+  apt:
+    name: bind9
+    state: absent
+    purge: true
+  when: cis_disable_dns | bool
+
+- name: 2.2.9 Ensure FTP Server is not installed (Automated)
+  apt:
+    name: vsftpd
+    state: absent
+    purge: true
+  when: cis_disable_ftp | bool
+
+- name: 2.2.10 Ensure HTTP server is not installed (Automated)
+  apt:
+    name: apache2
+    state: absent
+    purge: true
+  when: cis_disable_http | bool
+
+- name: 2.2.11 Ensure IMAP and POP3 server are not installed (Automated)
+  apt:
+    name:
+      - dovecot-imapd
+      - dovecot-pop3d
+    state: absent
+    purge: true
+  when: cis_disable_imappop3 | bool
+
+- name: 2.2.12 Ensure Samba is not installed (Automated)
+  apt:
+    name: samba
+    state: absent
+    purge: true
+  when: cis_disable_smb | bool
+
+- name: 2.2.13 Ensure HTTP Proxy Server is not installed (Automated)
+  apt:
+    name: squid
+    state: absent
+    purge: true
+  when: cis_disable_httpproxy | bool
+
+- name: 2.2.14 Ensure SNMP Server is not installed (Automated)
+  apt:
+    name: snmpd
+    state: absent
+    purge: true
+  when: cis_disable_snmpd | bool
+
+- name: 2.2.16 Ensure rsync service is not installed (Automated)
+  apt:
+    name: rsync
+    state: absent
+    purge: true
+  when: cis_disable_rsyncd | bool
+
+- name: 2.2.17 Ensure NIS Server is not installed (Automated)
+  apt:
+    name: nis
+    state: absent
+    purge: true
+  when: cis_disable_nis | bool
+
+####################################################
+# 2 Services
+#   2.3 Service Clients
+####################################################
+- name: 2.3.1 Ensure NIS Client is not installed (Automated)
+  apt:
+    name: nis
+    state: absent
+    purge: true
+  when: cis_disable_nis | bool
+
+- name: 2.3.2 Ensure rsh client is not installed (Automated)
+  apt:
+    name: rsh-client
+    state: absent
+    purge: true
+  when: cis_disable_client_rsh | bool
+
+- name: 2.3.3 Ensure talk client is not installed (Automated)
+  apt:
+    name: talk
+    state: absent
+    purge: true
+  when: cis_disable_client_talk | bool
+
+- name: 2.3.4 Ensure telnet client is not installed (Automated)
+  apt:
+    name: telnet
+    state: absent
+    purge: true
+  when: cis_disable_client_telnet | bool
+
+- name: 2.3.5 Ensure LDAP client is not installed (Automated)
+  apt:
+    name: ldap-utils
+    state: absent
+    purge: true
+  when: cis_disable_client_ldap | bool
+
+- name: 2.3.6 Ensure RPC is not installed (Automated)
+  apt:
+    name: rpcbind
+    state: absent
+    purge: true
+  when: cis_disable_client_rpc | bool
