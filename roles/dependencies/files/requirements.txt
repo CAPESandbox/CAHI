@@ -94,3 +94,4 @@ volatility3
 yara-python>=4.0.0
 netstruct
 pymongo>=3.11.3
+psutil==5.8.0

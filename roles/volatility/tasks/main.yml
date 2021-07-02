@@ -35,6 +35,14 @@
         src: "{{ volatility_win_symbols_url }}"
         dest: "{{ volatility3_symbols_dir.stdout }}"
         remote_src: true
+      when: volatility3_symbols_dir_verify.stat.isdir is defined and volatility3_symbols_dir_verify.stat.isdir
+
+    - name: Set correct permissions on Volatility symbols
+      file:
+        path: "{{ volatility3_symbols_dir.stdout }}"
+        owner: "{{ cape_user }}"
+        group: "{{ cape_group }}"
+        state: directory
+        recurse: true
       when: volatility3_symbols_dir_verify.stat.isdir is defined and volatility3_symbols_dir_verify.stat.isdir 
-      #volatility3_symbols_dir_verify.stat.exists | bool
   when: volatility3_install is success or volatility3_repo_install is success

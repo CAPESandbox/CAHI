@@ -7,10 +7,10 @@
   tags:
     - cis_section1
 
-#- name: Include CIS Benchmarks Section 2 Tasks - Services
-#  include_tasks: section2.yml
-#  tags:
-#    - cis_section2
+- name: Include CIS Benchmarks Section 2 Tasks - Services
+  include_tasks: section2.yml
+  tags:
+    - cis_section2
 
 #- name: Include CIS Benchmarks Section 3 Tasks - Network Configuration
 #  include_tasks: section3.yml

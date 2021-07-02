@@ -35,7 +35,7 @@ The following dependencies are required
   - Docker (podman should work but not tested yet)
 
  ```bash
- $ pip3 install ansible==2.9.21 molecule[docker] ansible-lint --user
+ $ pip3 install ansible==2.9.23 molecule[docker] ansible-lint --user
  ```
 
 Afterwards, clone CAHI repoistory and enter the newly created directory
@@ -93,7 +93,7 @@ Installing remaining requirements
 
 ```bash
 $ wget 
-$ pip3 install ansible==2.9.21 molecule python-vagrant molecule-vagrant ansible-lint --user
+$ pip3 install ansible==2.9.23 molecule python-vagrant molecule-vagrant ansible-lint --user
 ```
 
 Afterwards, clone CAHI repoistory and enter the newly created directory
