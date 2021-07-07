@@ -39,6 +39,7 @@ packages:
   - libpq-dev
   - libssl-dev
   - libtool
+  - lzip
   - make
   - mono-utils
   - net-tools
