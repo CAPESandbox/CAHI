@@ -20,7 +20,7 @@
 
 - name: Install psycopg2
   pip:
-    name: psycopg2
+    name: psycopg2-binary
     state: present
 
 - name: Inventory system services
