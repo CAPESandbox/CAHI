@@ -1,5 +1,5 @@
 ---
-mongodb_version: 4.4
+mongodb_version: 5.0
 mongodb_repo_key: "https://www.mongodb.org/static/pgp/server-{{ mongodb_version }}.asc"
 
 mongodb_db_main_path: /data
