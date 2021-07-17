@@ -84,3 +84,55 @@ xorg_packages:
 #####################################################
 # Section 5 Access, Authentication and Authorization
 #####################################################
+cis_sshd_config:
+  log_level: INFO
+  x11forwarding: 'no'
+  max_auth_tries: 4
+  ignore_rhosts: 'yes'
+  host_based_auth: 'no'
+  permit_root_login: 'no'
+  permit_empty_password: 'no'
+  permit_user_environment: 'no'
+  client_alive_interval: 300
+  client_alive_count_max: 0
+  login_grace_time: 60
+  banner: /etc/issue.net
+  use_pam: 'yes'
+  allow_tcp_forwarding: 'no'
+  max_startups: 10:30:60
+  max_sessions: 4
+  configure_ssh_users_groups: true
+  allow_users:
+    - admin
+    - devops
+    - vagrant
+  deny_users: []
+  allow_groups: []
+  deny_groups: []
+  ciphers:
+    - "chacha20-poly1305@openssh.com"
+    - "aes256-gcm@openssh.com,aes128-gcm@openssh.com"
+    - "aes256-ctr,aes192-ctr,aes128-ctr"
+  macs:
+    - "hmac-sha2-512-etm@openssh.com"
+    - "hmac-sha2-256-etm@openssh.com"
+    - "hmac-sha2-512,hmac-sha2-256"
+  kexalgorithms:
+    - "curve25519-sha256"
+    - "curve25519-sha256@libssh.org"
+    #- "diffie-hellmangroup14-sha256" Unsupported
+    - "diffie-hellman-group16-sha512"
+    - "diffie-hellman-group18-sha512"
+    - "ecdh-sha2-nistp521"
+    - "ecdh-sha2-nistp384"
+    - "ecdh-sha2-nistp256"
+    #- "diffiehellman-group-exchange-sha256" Unspported
+
+cis_shadow_params:
+  pass_max_days: 365
+  pass_min_days: 7
+  pass_warn_age: 7
+  inactive_days: 30
+
+cis_default_user_mask: "027"
+cis_default_user_shell_timeout: 900

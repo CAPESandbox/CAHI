@@ -12,22 +12,22 @@
   tags:
     - cis_section2
 
-#- name: Include CIS Benchmarks Section 3 Tasks - Network Configuration
-#  include_tasks: section3.yml
-#  tags:
-#    - cis_section3
+- name: Include CIS Benchmarks Section 3 Tasks - Network Configuration
+  include_tasks: section3.yml
+  tags:
+    - cis_section3
 
 #- name: Include CIS Benchmarks Section 4 Tasks - Logging and Auditing
 #  include_tasks: section4.yml
 #  tags:
 #    - cis_section4
 
-#- name: Include CIS Benchmarks Section 5 Tasks - Access, Authentication and Authorization
-#  include_tasks: section5.yml
-#  tags:
-#    - cis_section5
+- name: Include CIS Benchmarks Section 5 Tasks - Access, Authentication and Authorization
+  include_tasks: section5.yml
+  tags:
+    - cis_section5
 
-#- name: Include CIS Benchmarks Section 6 Tasks - System Maintenance
-#  include_tasks: section6.yml
-#  tags:
-#    - cis_section6
+- name: Include CIS Benchmarks Section 6 Tasks - System Maintenance
+  include_tasks: section6.yml
+  tags:
+    - cis_section6

@@ -1,0 +1,222 @@
+---
+# NOTE: CAPE NETWORKING MUST BE TESTED AFTER CHANGES HERE
+
+####################################################
+# 3 Network Configuration
+#   3.3 Network Parameters (Host and Router)
+####################################################
+- name: 3.3.1 Ensure source routed packets are not accepted (Scored)
+  sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    state: present
+  loop:
+    - { name: net.ipv4.conf.all.accept_source_route, value: 0 }
+    - { name: net.ipv4.conf.default.accept_source_route, value: 0 }
+  notify:
+    - Flush IPv4 route table
+  tags:
+    - scored
+    - level1
+    - server
+    - workstation
+
+- name: 3.3.2 Ensure ICMP redirects are not accepted (Scored)
+  sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    state: present
+  loop:
+    - { name: net.ipv4.conf.all.accept_redirects, value: 0 }
+    - { name: net.ipv4.conf.default.accept_redirects, value: 0 }
+  notify:
+    - Flush IPv4 route table
+  tags:
+    - scored
+    - level1
+    - server
+    - workstation
+
+- name: 3.3.3 Ensure secure ICMP redirects are not accepted (Scored)
+  sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    state: present
+  loop:
+    - { name: net.ipv4.conf.all.secure_redirects, value: 0 }
+    - { name: net.ipv4.conf.default.secure_redirects, value: 0 }
+  notify:
+    - Flush IPv4 route table
+  tags:
+    - scored
+    - level1
+    - server
+    - workstation
+
+- name: 3.3.4 Ensure suspicious packets are logged (Scored)
+  sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    state: present
+  loop:
+    - { name: net.ipv4.conf.all.log_martians, value: 1 }
+    - { name: net.ipv4.conf.default.log_martians, value: 1 }
+  notify:
+    - Flush IPv4 route table
+  tags:
+    - scored
+    - level1
+    - server
+    - workstation
+
+- name: 3.3.5 Ensure broadcast ICMP requests are ignored (Scored)
+  sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    state: present
+  loop:
+    - { name: net.ipv4.icmp_echo_ignore_broadcasts, value: 1 }
+  notify:
+    - Flush IPv4 route table
+  tags:
+    - scored
+    - level1
+    - server
+    - workstation
+
+- name: 3.3.6 Ensure bogus ICMP responses are ignored (Scored)
+  sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    state: present
+  loop:
+    - { name: net.ipv4.icmp_ignore_bogus_error_responses, value: 1 }
+  notify:
+    - Flush IPv4 route table
+  tags:
+    - scored
+    - level1
+    - server
+    - workstation
+
+- name: 3.3.7 Ensure Reverse Path Filtering is enabled (Scored)
+  sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    state: present
+  loop:
+    - { name: net.ipv4.conf.all.rp_filter, value: 1 }
+    - { name: net.ipv4.conf.default.rp_filter, value: 1 }
+  notify:
+    - Flush IPv4 route table
+  tags:
+    - scored
+    - level1
+    - server
+    - workstation
+
+- name: 3.3.8 Ensure TCP SYN Cookies is enabled (Scored)
+  sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    state: present
+  loop:
+    - { name: net.ipv4.tcp_syncookies, value: 1 }
+  notify:
+    - Flush IPv4 route table
+  tags:
+    - scored
+    - level1
+    - server
+    - workstation
+
+- name: 3.3.9 Ensure IPv6 router advertisements are not accepted (Not Scored)
+  sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    state: present
+  loop:
+    - { name: net.ipv6.conf.all.accept_ra, value: 0 }
+    - { name: net.ipv6.conf.default.accept_ra, value: 0 }
+  notify:
+    - Flush IPv6 route table
+  tags:
+    - level1
+    - server
+    - workstation
+
+####################################################
+# 3 Network Configuration
+#   3.4 Uncommon Network Protocols
+####################################################
+- name: 3.4.1 Ensure DCCP is disabled
+  block:
+    - name: 3.4.1 Ensure DCCP is disabled | Unload filesystem module
+      modprobe:
+        name: dccp
+        state: absent
+      tags:
+        - level2
+    
+    - name: 3.4.1 Ensure DCCP is disabled | Add modprobe configuration
+      lineinfile:
+        path: /etc/modprobe.d/dccp.conf
+        line: install dccp /bin/true
+        create: true
+        owner: root
+        group: root
+        mode: 0644
+
+- name: 3.4.2 Ensure SCTP is disabled
+  block:
+    - name: 3.4.2 Ensure SCTP is disabled | Unload filesystem module
+      modprobe:
+        name: sctp
+        state: absent
+      tags:
+        - level2
+    
+    - name: 3.4.2 Ensure SCTP is disabled | Add modprobe configuration
+      lineinfile:
+        path: /etc/modprobe.d/sctp.conf
+        line: install sctp /bin/true
+        create: true
+        owner: root
+        group: root
+        mode: 0644
+
+- name: 3.4.3 Ensure RDS is disabled
+  block:
+    - name: 3.4.3 Ensure RDS is disabled | Unload filesystem module
+      modprobe:
+        name: rds
+        state: absent
+      tags:
+        - level2
+    
+    - name: 3.4.3 Ensure RDS is disabled | Add modprobe configuration
+      lineinfile:
+        path: /etc/modprobe.d/rds.conf
+        line: install rds /bin/true
+        create: true
+        owner: root
+        group: root
+        mode: 0644
+
+- name: 3.4.4 Ensure TIPC is disabled
+  block:
+    - name: 3.4.4 Ensure TIPC is disabled | Unload filesystem module
+      modprobe:
+        name: tipc
+        state: absent
+      tags:
+        - level2
+    
+    - name: 3.4.4 Ensure TIPC is disabled | Add modprobe configuration
+      lineinfile:
+        path: /etc/modprobe.d/tipc.conf
+        line: install tipc /bin/true
+        create: true
+        owner: root
+        group: root
+        mode: 0644

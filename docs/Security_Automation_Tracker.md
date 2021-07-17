@@ -8,7 +8,7 @@ Currently, the following secure configurations are either under active automatio
 | ModSecurity WAF for NGINX                                  | Completed                    |
 | Fail2ban                                                   | Completed, Under Review      |
 | CIS (Center of Information Security) Benchmarks for NGINX  | Completed, Under Review      |
-| CIS (Center of Information Security) Benchmarks for Ubuntu | Brainstorming                |
+| CIS (Center of Information Security) Benchmarks for Ubuntu | In Progress                  |
 
 ## CIS (Center of Information Security) Benchmarks Automation Tracker
 
@@ -63,10 +63,68 @@ Currently, the following secure configurations are either under active automatio
 | 2.3.4   | Ensure telnet client is not installed                                         | Scored     | :heavy_check_mark: |
 | 2.3.5   | Ensure LDAP client is not installed                                           | Scored     | :heavy_check_mark: |
 | 2.3.6   | Ensure RPC is not installed                                                   | Scored     | :heavy_check_mark: |
+| 3.3.1   | Ensure source routed packets are not accepted                                 | Scored     | :heavy_check_mark: |
+| 3.3.2   | Ensure ICMP redirects are not accepted                                        | Scored     | :heavy_check_mark: |
+| 3.3.3   | Ensure secure ICMP redirects are not accepted                                 | Scored     | :heavy_check_mark: |
+| 3.3.4   | Ensure suspicious packets are logged                                          | Scored     | :heavy_check_mark: |
+| 3.3.5   | Ensure broadcast ICMP requests are ignored                                    | Scored     | :heavy_check_mark: |
+| 3.3.6   | Ensure bogus ICMP responses are ignored                                       | Scored     | :heavy_check_mark: |
+| 3.3.7   | Ensure Reverse Path Filtering is enabled                                      | Scored     | :heavy_check_mark: |
+| 3.3.8   | Ensure TCP SYN Cookies is enabled                                             | Scored     | :heavy_check_mark: |
+| 3.3.9   | Ensure IPv6 router advertisements are not accepted                            | Scored     | :heavy_check_mark: |
+| 3.4.1   | Ensure DCCP is disabled                                                       | Scored     | :heavy_check_mark: |
+| 3.4.2   | Ensure SCTP is disabled                                                       | Scored     | :heavy_check_mark: |
+| 3.4.3   | Ensure RDS is disabled                                                        | Scored     | :heavy_check_mark: |
+| 3.4.4   | Ensure TIPC is disabled                                                       | Scored     | :heavy_check_mark: |
 | 4.3     | Ensure logrotate is configured                                                | Scored     | :heavy_check_mark: |
 | 4.3     | Ensure logrotate is configured                                                | Scored     | :heavy_check_mark: |
 | 4.3     | Ensure logrotate is configured                                                | Scored     | :heavy_check_mark: |
 | 4.4     | Ensure logrotate assigns appropriate permissions                              | Scored     | :heavy_check_mark: |
+| 5.1.1   | Ensure cron daemon is enabled and running                                     | Scored     | :heavy_check_mark: |
+| 5.1.2   | Ensure permissions on /etc/crontab are configured                             | Scored     | :heavy_check_mark: |
+| 5.1.3   | Ensure permissions on /etc/cron.hourly are configured                         | Scored     | :heavy_check_mark: |
+| 5.1.4   | Ensure permissions on /etc/cron.daily are configured                          | Scored     | :heavy_check_mark: |
+| 5.1.5   | Ensure permissions on /etc/cron.weekly are configured                         | Scored     | :heavy_check_mark: |
+| 5.1.6   | Ensure permissions on /etc/cron.monthly are configured                        | Scored     | :heavy_check_mark: |
+| 5.1.7   | Ensure permissions on /etc/cron.d are configured                              | Scored     | :heavy_check_mark: |
+| 5.1.8   | Ensure cron is restricted to authorized users                                 | Scored     | :heavy_check_mark: |
+| 5.1.9   | Ensure at is restricted to authorized users                                   | Scored     | :heavy_check_mark: |
+| 5.2.1   | Ensure permissions on /etc/ssh/sshd_config are configured                     | Scored     | :heavy_check_mark: |
+| 5.2.2   | Ensure permissions on SSH private host key files are configured               | Scored     | :heavy_check_mark: |
+| 5.2.3   | Ensure permissions on SSH public host key files are configured                | Scored     | :heavy_check_mark: |
+| 5.2.4   | Ensure SSH LogLevel is appropriate                                            | Scored     | :heavy_check_mark: |
+| 5.2.5   | Ensure SSH X11 forwarding is disabled                                         | Scored     | :heavy_check_mark: |
+| 5.2.6   | Ensure SSH MaxAuthTries is set to 4 or less                                   | Scored     | :heavy_check_mark: |
+| 5.2.7   | Ensure SSH IgnoreRhosts is enabled                                            | Scored     | :heavy_check_mark: |
+| 5.2.8   | Ensure SSH HostbasedAuthentication is disabled                                | Scored     | :heavy_check_mark: |
+| 5.2.9   | Ensure SSH root login is disabled                                             | Scored     | :heavy_check_mark: |
+| 5.2.10  | Ensure SSH PermitEmptyPasswords is disabled                                   | Scored     | :heavy_check_mark: |
+| 5.2.11  | Ensure SSH PermitUserEnvironment is disabled                                  | Scored     | :heavy_check_mark: |
+| 5.2.12  | Ensure only strong Ciphers are used                                           | Scored     | :heavy_check_mark: |
+| 5.2.13  | Ensure only strong MAC algorithms are used                                    | Scored     | :heavy_check_mark: |
+| 5.2.14  | Ensure only strong Key Exchange algorithms are used                           | Scored     | :heavy_check_mark: |
+| 5.2.15  | Ensure SSH Idle Timeout Interval is configured                                | Scored     | :heavy_check_mark: |
+| 5.2.16  | Ensure SSH LoginGraceTime is set to one minute or less                        | Scored     | :heavy_check_mark: |
+| 5.2.17  | Ensure SSH access is limited                                                  | Scored     | :heavy_check_mark: |
+| 5.2.18  | Ensure SSH warning banner is configured                                       | Scored     | :heavy_check_mark: |
+| 5.2.19  | Ensure SSH PAM is enabled                                                     | Scored     | :heavy_check_mark: |
+| 5.2.20  | Ensure SSH AllowTcpForwarding is disabled                                     | Scored     | :heavy_check_mark: |
+| 5.2.21  | Ensure SSH MaxStartups is configured                                          | Scored     | :heavy_check_mark: |
+| 5.2.22  | Ensure SSH MaxSessions is limited                                             | Scored     | :heavy_check_mark: |
+| 5.4.1.1 | Ensure password expiration is 365 days or less                                | Scored     | :heavy_check_mark: |
+| 5.4.1.2 | Ensure minimum days between password changes is configured                    | Scored     | :heavy_check_mark: |
+| 5.4.1.3 | Ensure password expiration warning days is 7 or more                          | Scored     | :heavy_check_mark: |
+| 5.4.3   | Ensure default group for the root account is GID 0                            | Scored     | :heavy_check_mark: |
+| 5.4.4   | Ensure default user umask is 027 or more restrictive                          | Scored     | :heavy_check_mark: |
+| 5.4.5   | Ensure default user shell timeout is 900 seconds or less                      | Scored     | :heavy_check_mark: |
+| 6.1.2   | Ensure permissions on /etc/passwd are configured                              | Scored     | :heavy_check_mark: |
+| 6.1.3   | Ensure permissions on /etc/gshadow- are configured                            | Scored     | :heavy_check_mark: |
+| 6.1.4   | Ensure permissions on /etc/shadow are configured                              | Scored     | :heavy_check_mark: |
+| 6.1.5   | Ensure permissions on /etc/group are configured                               | Scored     | :heavy_check_mark: |
+| 6.1.6   | Ensure permissions on /etc/passwd- are configured                             | Scored     | :heavy_check_mark: |
+| 6.1.7   | Ensure permissions on /etc/shadow- are configured                             | Scored     | :heavy_check_mark: |
+| 6.1.8   | Ensure permissions on /etc/group- are configured                              | Scored     | :heavy_check_mark: |
+| 6.1.9   | Ensure permissions on /etc/gshadow are configured                             | Scored     | :heavy_check_mark: |
 
 ### NGINX
 

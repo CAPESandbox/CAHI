@@ -1,0 +1,133 @@
+---
+####################################################
+# 6 System Maintenance
+#   6.1 System File Permissions
+####################################################
+
+- name: 6.1.2 Ensure permissions on /etc/passwd are configured (Scored)
+  file:
+    path: /etc/passwd
+    modification_time: preserve
+    access_time: preserve
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - level1
+    - scored
+    - server
+    - workstation
+    - system-maintenance
+    - system-file-permissions
+
+- name: 6.1.3 Ensure permissions on /etc/gshadow- are configured (Scored)
+  file:
+    path: /etc/gshadow-
+    modification_time: preserve
+    access_time: preserve
+    owner: root
+    group: root
+    mode: 0640
+  tags:
+    - level1
+    - scored
+    - server
+    - workstation
+    - system-maintenance
+    - system-file-permissions
+
+- name: 6.1.4 Ensure permissions on /etc/shadow are configured (Scored)
+  file:
+    path: /etc/shadow
+    modification_time: preserve
+    access_time: preserve
+    owner: root
+    group: root
+    mode: 0640
+  tags:
+    - level1
+    - scored
+    - server
+    - workstation
+    - system-maintenance
+    - system-file-permissions
+
+- name: 6.1.5 Ensure permissions on /etc/group are configured (Scored)
+  file:
+    path: /etc/group
+    modification_time: preserve
+    access_time: preserve
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - level1
+    - scored
+    - server
+    - workstation
+    - system-maintenance
+    - system-file-permissions
+
+- name: 6.1.6 Ensure permissions on /etc/passwd- are configured (Scored)
+  file:
+    path: /etc/passwd-
+    modification_time: preserve
+    access_time: preserve
+    owner: root
+    group: root
+    mode: 0600
+  tags:
+    - level1
+    - scored
+    - server
+    - workstation
+    - system-maintenance
+    - system-file-permissions
+
+- name: 6.1.7 Ensure permissions on /etc/shadow- are configured (Scored)
+  file:
+    path: /etc/shadow-
+    modification_time: preserve
+    access_time: preserve
+    owner: root
+    group: root
+    mode: 0600
+  tags:
+    - level1
+    - scored
+    - server
+    - workstation
+    - system-maintenance
+    - system-file-permissions
+
+- name: 6.1.8 Ensure permissions on /etc/group- are configured (Scored)
+  file:
+    path: /etc/group-
+    modification_time: preserve
+    access_time: preserve
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - level1
+    - scored
+    - server
+    - workstation
+    - system-maintenance
+    - system-file-permissions
+
+- name: 6.1.9 Ensure permissions on /etc/gshadow are configured (Scored)
+  file:
+    path: /etc/gshadow
+    modification_time: preserve
+    access_time: preserve
+    owner: root
+    group: root
+    mode: 0640
+  tags:
+    - level1
+    - scored
+    - server
+    - workstation
+    - system-maintenance
+    - system-file-permissions

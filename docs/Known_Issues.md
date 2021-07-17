@@ -30,6 +30,8 @@ The files causing the issue that were identified thus far (but may include other
 
 ### Solution:
 
+**NOTE:** This is now automated via ansible in the ```dependencies``` role.
+
 Manually ```rm -rf``` these files should no longer cause Ansible to error out. Handling this automaticaly by Ansible upon converge may be added later.
 
 ### Error 2: ```pip dependencies```

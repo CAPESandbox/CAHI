@@ -25,7 +25,8 @@ pyinstaller
 maec
 regex
 xmltodict
-git+https://github.com/doomedraven/sflock.git
+#git+https://github.com/doomedraven/sflock.git
+SFlock2==0.3.20
 git+https://github.com/doomedraven/socks5man.git
 pyattck==3.0.1
 distorm3
@@ -95,3 +96,4 @@ yara-python>=4.0.0
 netstruct
 pymongo>=3.11.3
 psutil==5.8.0
+tabulate[widechars]==0.8.9
