@@ -32,3 +32,13 @@
     name: pyclamd
     state: present
     extra_args: --user
+
+- name: Verify ClamAV apparmor definitions file exists
+  stat:
+    path: /etc/apparmor.d/usr.sbin.clamd
+  register: clamav_apparmor_defs
+
+- name: Replace ClamAV apparmor definitions
+  command: /usr/sbin/apparmor_parser -r "{{ clamav_apparmor_defs.stat.path }}"
+  changed_when: false
+  when: clamav_apparmor_defs.stat is defined and clamav_apparmor_defs.stat.exists | bool

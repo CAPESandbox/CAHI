@@ -1,0 +1,795 @@
+####################################################
+# 5 Access, Authentication and Authorization
+#   5.1 Configure cron
+####################################################
+- name: Pre-CIS - Ensure cron is installed
+  apt:
+    name: cron
+    state: present
+
+- name: Inventory system services facts
+  service_facts:
+
+- name: 5.1.1 Ensure cron daemon is enabled (Scored)
+  systemd:
+    name: cron.service
+    enabled: true
+  when: ansible_facts.services['cron.service'] is defined
+  tags:
+    - level1
+    - scored
+    - server
+    - workstation
+    - aaa
+    - cron
+
+- name: 5.1.2 Ensure permissions on /etc/crontab are configured (Scored)
+  file:
+    path: /etc/crontab
+    state: file
+    owner: root
+    group: root
+    mode: 0600
+  tags:
+    - level1
+    - scored
+    - server
+    - workstation
+    - aaa
+    - cron
+
+- name: 5.1.3 Ensure permissions on /etc/cron.hourly are configured (Scored)
+  file:
+    path: /etc/cron.hourly
+    state: directory
+    owner: root
+    group: root
+    mode: 0700
+  tags:
+    - level1
+    - scored
+    - server
+    - workstation
+    - aaa
+    - cron
+
+- name: 5.1.4 Ensure permissions on /etc/cron.daily are configured (Scored)
+  file:
+    path: /etc/cron.daily
+    state: directory
+    owner: root
+    group: root
+    mode: 0700
+  tags:
+    - level1
+    - scored
+    - server
+    - workstation
+    - aaa
+    - cron
+
+- name: 5.1.5 Ensure permissions on /etc/cron.weekly are configured (Scored)
+  file:
+    path: /etc/cron.weekly
+    state: directory
+    owner: root
+    group: root
+    mode: 0700
+  tags:
+    - level1
+    - scored
+    - server
+    - workstation
+    - aaa
+    - cron
+
+- name: 5.1.6 Ensure permissions on /etc/cron.monthly are configured (Scored)
+  file:
+    path: /etc/cron.monthly
+    state: directory
+    owner: root
+    group: root
+    mode: 0700
+  tags:
+    - level1
+    - scored
+    - server
+    - workstation
+    - aaa
+    - cron
+
+- name: 5.1.7 Ensure permissions on /etc/cron.d are configured (Scored)
+  file:
+    path: /etc/cron.d
+    state: directory
+    owner: root
+    group: root
+    mode: 0700
+  tags:
+    - level1
+    - scored
+    - server
+    - workstation
+    - aaa
+    - cron
+
+- name: 5.1.8 Ensure at/cron is restricted to authorized users (Scored) | Remove /etc/cron.deny and /etc/at.deny
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/cron.deny
+    - /etc/at.deny
+  tags:
+    - level1
+    - scored
+    - server
+    - workstation
+    - aaa
+    - cron
+
+- name: 5.1.8 Ensure at/cron is restricted to authorized users (Scored) | Ensure /etc/cron.allow and /etc/at.allow exist with correct permissions
+  file:
+    path: "{{ item }}"
+    state: touch
+    access_time: preserve
+    modification_time: preserve
+    owner: root
+    group: root
+    mode: 0600
+  loop:
+    - /etc/cron.allow
+    - /etc/at.allow
+  tags:
+    - level1
+    - scored
+    - server
+    - workstation
+    - aaa
+    - cron
+
+####################################################
+# 5 Access, Authentication and Authorization
+#   5.2 SSH Server Configuration
+####################################################
+# A container may not already have openssh-server installed
+- name: Ensure OpenSSH server is installed
+  apt:
+    name: openssh-server
+    state: present
+  when: ansible_virtualization_type in ["docker"]
+
+- name: 5.2.1 Ensure permissions on /etc/ssh/ssh_config are configured (Scored)
+  file:
+    path: /etc/ssh/sshd_config
+    state: file
+    owner: root
+    group: root
+    mode: 0600
+  tags:
+    - level1
+    - scored
+    - server
+    - workstation
+    - aaa
+    - ssh
+
+- name: 5.2.2 Ensure permissions on SSH private host key files are configured (Scored) | Find all SSH private keys
+  find:
+    path: /etc/ssh
+    pattern: "^ssh_host_.*_key$"
+    file_type: file
+    use_regex: true
+  register: ssh_private_keys
+  tags:
+    - level1
+    - scored
+    - server
+    - workstation
+    - aaa
+    - ssh
+
+- name: 5.2.2 Ensure permissions on SSH private host key files are configured (Scored) | Change permission of SSH private keys
+  file:
+    path: "{{ item.path }}"
+    owner: root
+    group: root
+    mode: 0600
+  loop: "{{ ssh_private_keys.files }}"
+  when: ssh_private_keys is defined and ssh_private_keys | length > 0
+  tags:
+    - level1
+    - scored
+    - server
+    - workstation
+    - aaa
+    - ssh
+
+- name: 5.2.3 Ensure permissions on SSH public host key files are configured (Scored) |  Find all SSH public keys
+  find:
+    path: /etc/ssh
+    pattern: '^ssh_host_.*_key\.pub$'
+    file_type: file
+    use_regex: true
+  register: ssh_public_keys
+  tags:
+    - level1
+    - scored
+    - server
+    - workstation
+    - aaa
+    - ssh
+
+- name: 5.2.3 Ensure permissions on SSH public host key files are configured (Scored) | Change permission of SSH public keys
+  file:
+    path: "{{ item.path }}"
+    owner: root
+    group: root
+    mode: 0644
+  loop: "{{ ssh_public_keys.files }}"
+  when: ssh_public_keys is defined and ssh_public_keys | length > 0
+  tags:
+    - level1
+    - scored
+    - server
+    - workstation
+    - aaa
+    - ssh
+
+- name: 5.2.4 Ensure SSH LogLevel is appropriate (Scored)
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    state: present
+    regexp: "^(#)?LogLevel"
+    line: "LogLevel {{ cis_sshd_config['log_level'] }}"
+    validate: /usr/sbin/sshd -T -f %s
+    owner: root
+    group: root
+    mode: 0600
+  tags:
+    - level1
+    - scored
+    - server
+    - workstation
+    - aaa
+    - ssh
+
+- name: 5.2.5 Ensure SSH X11 forwarding is disabled (Scored)
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    state: present
+    regexp: "^(#)?X11Forwarding"
+    line: "X11Forwarding {{ cis_sshd_config['x11forwarding'] }}"
+    validate: /usr/sbin/sshd -T -f %s
+    owner: root
+    group: root
+    mode: 0600
+  tags:
+    - level1
+    - scored
+    - server
+    - workstation
+    - aaa
+    - ssh
+    
+- name: 5.2.6 Ensure SSH MaxAuthTries is set to 4 or less (Scored)
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    state: present
+    regexp: "^(#)?MaxAuthTries "
+    line: "MaxAuthTries {{ cis_sshd_config['max_auth_tries'] }}"
+    validate: /usr/sbin/sshd -T -f %s
+    owner: root
+    group: root
+    mode: 0600
+  tags:
+    - level1
+    - scored
+    - server
+    - workstation
+    - aaa
+    - ssh
+
+- name: 5.2.7 Ensure SSH IgnoreRhosts is enabled (Scored)
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    state: present
+    regexp: "^(#)?IgnoreRhosts"
+    line: "IgnoreRhosts {{ cis_sshd_config['ignore_rhosts'] }}"
+    validate: /usr/sbin/sshd -T -f %s
+    owner: root
+    group: root
+    mode: 0600
+  tags:
+    - level1
+    - scored
+    - server
+    - workstation
+    - aaa
+    - ssh
+
+- name: 5.2.8 Ensure SSH HostbasedAuthentication is disabled (Scored)
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    state: present
+    regexp: "^(#)?HostbasedAuthentication"
+    line: "HostbasedAuthentication {{ cis_sshd_config['host_based_auth'] }}"
+    validate: /usr/sbin/sshd -T -f %s
+    owner: root
+    group: root
+    mode: 0600
+  tags:
+    - level1
+    - scored
+    - server
+    - workstation
+    - aaa
+    - ssh
+
+- name: 5.2.9 Ensure SSH root login is disabled (Scored)
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    state: present
+    regexp: "^(#)?PermitRootLogin"
+    line: "PermitRootLogin {{ cis_sshd_config['permit_root_login'] }}"
+    validate: /usr/sbin/sshd -T -f %s
+    owner: root
+    group: root
+    mode: 0600
+  tags:
+    - level1
+    - scored
+    - server
+    - workstation
+    - aaa
+    - ssh
+
+- name: 5.2.10 Ensure SSH PermitEmptyPasswords is disabled (Scored)
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    state: present
+    regexp: "^(#)?PermitEmptyPasswords"
+    line: "PermitEmptyPasswords {{ cis_sshd_config['permit_empty_password'] }}"
+    validate: /usr/sbin/sshd -T -f %s
+    owner: root
+    group: root
+    mode: 0600
+  tags:
+    - level1
+    - scored
+    - server
+    - workstation
+    - aaa
+    - ssh
+
+- name: 5.2.11 Ensure SSH PermitUserEnvironment is disabled (Scored)
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    state: present
+    regexp: "^(#)?PermitUserEnvironment"
+    line: "PermitUserEnvironment {{ cis_sshd_config['permit_user_environment'] }}"
+    validate: /usr/sbin/sshd -T -f %s
+    owner: root
+    group: root
+    mode: 0600
+  tags:
+    - level1
+    - scored
+    - server
+    - workstation
+    - aaa
+    - ssh
+
+- name: 5.2.12 Ensure only strong Ciphers are used (Scored)
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    state: present
+    regexp: "^(#)?Ciphers"
+    line: "Ciphers {{ cis_sshd_config['ciphers'] | join(',') }}"
+    validate: /usr/sbin/sshd -T -f %s
+    owner: root
+    group: root
+    mode: 0600
+  tags:
+    - level1
+    - scored
+    - server
+    - workstation
+    - aaa
+    - ssh
+
+- name: 5.2.13 Ensure only strong MAC algorithms are used (Scored)
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    state: present
+    regexp: "^(#)?MACs"
+    line: "MACs {{ cis_sshd_config['macs'] | join(',') }}"
+    validate: /usr/sbin/sshd -T -f %s
+    owner: root
+    group: root
+    mode: 0600
+  tags:
+    - level1
+    - scored
+    - server
+    - workstation
+    - aaa
+    - ssh
+
+- name: 5.2.14 Ensure only strong Key Exchange algorithms are used (Scored)
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    state: present
+    regexp: "^(#)?KexAlgorithms"
+    line: "KexAlgorithms {{ cis_sshd_config['kexalgorithms'] | join(',') }}"
+    validate: /usr/sbin/sshd -T -f %s
+    owner: root
+    group: root
+    mode: 0600
+  tags:
+    - level1
+    - scored
+    - server
+    - workstation
+    - aaa
+    - ssh
+
+- name: 5.2.15 Ensure SSH Idle Timeout Interval is configured (Scored) | ClientAliveInterval
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    state: present
+    regexp: "^(#)?ClientAliveInterval"
+    line: "ClientAliveInterval {{ cis_sshd_config['client_alive_interval'] }}"
+    validate: /usr/sbin/sshd -T -f %s
+    owner: root
+    group: root
+    mode: 0600
+  tags:
+    - level1
+    - scored
+    - server
+    - workstation
+    - aaa
+    - ssh
+
+- name: 5.2.15 Ensure SSH Idle Timeout Interval is configured (Scored) | ClientAliveCountMax
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    state: present
+    regexp: "^(#)?ClientAliveCountMax"
+    line: "ClientAliveCountMax {{ cis_sshd_config['client_alive_count_max'] }}"
+    validate: /usr/sbin/sshd -T -f %s
+    owner: root
+    group: root
+    mode: 0600
+  tags:
+    - level1
+    - scored
+    - server
+    - workstation
+    - aaa
+    - ssh
+
+- name: 5.2.16 Ensure SSH LoginGraceTime is set to one minute or less (Scored)
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    state: present
+    regexp: "^(#)?LoginGraceTime "
+    line: "LoginGraceTime {{ cis_sshd_config['login_grace_time'] }}"
+    validate: /usr/sbin/sshd -T -f %s
+    owner: root
+    group: root
+    mode: 0600
+  tags:
+    - level1
+    - scored
+    - server
+    - workstation
+    - aaa
+    - ssh
+
+- name: 5.2.17 Ensure SSH access is limited (Scored)
+  block:
+    - name: 5.2.17 Ensure SSH access is limited (Scored) | AllowUsers
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: "^AllowUsers"
+        line: "AllowUsers {{ cis_sshd_config['allow_users'] | join(' ') }}"
+        validate: /usr/sbin/sshd -T -f %s
+        owner: root
+        group: root
+        mode: 0600
+      when: cis_sshd_config['allow_users'] | default(['']) | length > 0
+      notify:
+        - Restart sshd service
+      tags:
+        - level1
+        - scored
+        - server
+        - workstation
+        - aaa
+        - ssh
+
+    - name: 5.2.17 Ensure SSH access is limited (Scored) | AllowGroups
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: "^AllowGroups"
+        line: "AllowUsers {{ cis_sshd_config['allow_groups'] | join(' ') }}"
+        validate: /usr/sbin/sshd -T -f %s
+        owner: root
+        group: root
+        mode: 0600
+      when: cis_sshd_config['allow_groups'] | default(['']) | length > 0
+      notify:
+        - Restart sshd service
+      tags:
+        - level1
+        - scored
+        - server
+        - workstation
+        - aaa
+        - ssh
+
+    - name: 5.2.17 Ensure SSH access is limited (Scored) | DenyUsers
+      lineinfile:
+        path: /etc/ssh/ssh_config
+        regexp: "^DenyUsers"
+        line: "AllowUsers {{ cis_sshd_config['deny_users'] | join(' ') }}"
+        validate: /usr/sbin/sshd -T -f %s
+        owner: root
+        group: root
+        mode: 0600
+      when: cis_sshd_config['deny_users'] | default(['']) | length > 0
+      notify:
+        - Restart sshd service
+      tags:
+        - level1
+        - scored
+        - server
+        - workstation
+        - aaa
+        - ssh
+
+    - name: 5.2.17 Ensure SSH access is limited (Scored) | DenyGroups
+      lineinfile:
+        path: /etc/ssh/ssh_config
+        regexp: "^DenyGroups"
+        line: "AllowUsers {{ cis_sshd_config['deny_groups'] | join(' ') }}"
+        validate: /usr/sbin/sshd -T -f %s
+        owner: root
+        group: root
+        mode: 0600
+      when: cis_sshd_config['deny_groups'] | default(['']) | length > 0
+      notify:
+        - Restart sshd service
+      tags:
+        - level1
+        - scored
+        - server
+        - workstation
+        - aaa
+        - ssh
+
+  when: cis_sshd_config['configure_ssh_users_groups'] is defined and cis_sshd_config['configure_ssh_users_groups'] | bool
+
+- name: 5.2.18 Ensure SSH warning banner is configured (Scored)
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    state: present
+    regexp: "^(#)?Banner"
+    line: "Banner {{ cis_sshd_config['banner'] }}"
+    validate: /usr/sbin/sshd -T -f %s
+    owner: root
+    group: root
+    mode: 0600
+  tags:
+    - level1
+    - scored
+    - server
+    - workstation
+    - aaa
+    - ssh
+
+- name: 5.2.19 Ensure SSH PAM is enabled (Scored)
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    state: present
+    regexp: "^(#)?UsePAM"
+    line: "UsePAM {{ cis_sshd_config['use_pam'] }}"
+    validate: /usr/sbin/sshd -T -f %s
+    owner: root
+    group: root
+    mode: 0600
+  tags:
+    - level1
+    - scored
+    - server
+    - workstation
+    - aaa
+    - ssh
+
+- name: 5.2.20 Ensure SSH AllowTcpForwarding is disabled (Scored)
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    state: present
+    regexp: "^(#)?AllowTcpForwarding"
+    line: "AllowTcpForwarding {{ cis_sshd_config['allow_tcp_forwarding'] }}"
+    validate: /usr/sbin/sshd -T -f %s
+    owner: root
+    group: root
+    mode: 0600
+  tags:
+    - level1
+    - scored
+    - server
+    - workstation
+    - aaa
+    - ssh
+
+- name: 5.2.21 Ensure SSH MaxStartups is configured (Scored)
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    state: present
+    regexp: "^(#)?MaxStartups"
+    line: "MaxStartups {{ cis_sshd_config['max_startups'] }}"
+    validate: /usr/sbin/sshd -T -f %s
+    owner: root
+    group: root
+    mode: 0600
+  tags:
+    - level1
+    - scored
+    - server
+    - workstation
+    - aaa
+    - ssh
+
+- name: 5.2.22 Ensure SSH MaxSessions is set to 4 or less (Scored)
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    state: present
+    regexp: "^(#)?MaxSessions"
+    line: "MaxSessions {{ cis_sshd_config['max_sessions'] }}"
+    validate: /usr/sbin/sshd -T -f %s
+    owner: root
+    group: root
+    mode: 0600
+  tags:
+    - level1
+    - scored
+    - server
+    - workstation
+    - aaa
+    - ssh
+
+####################################################
+# 5 Access, Authentication and Authorization
+#   5.3 Configure PAM
+####################################################
+  
+
+####################################################
+# 5 Access, Authentication and Authorization
+#   5.4 User Accounts and Environment
+####################################################
+- name: 5.4.1.1 Ensure password expiration is 365 days or less (Scored)
+  lineinfile:
+    path: /etc/login.defs
+    state: present
+    regexp: '^PASS_MAX_DAYS'
+    line: 'PASS_MAX_DAYS	{{ cis_shadow_params["pass_max_days"] }}'
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - level1
+    - scored
+    - server
+    - workstation
+    - aaa
+    - user-accounts
+
+- name: 5.4.1.2 Ensure minimum days between password changes is configured (Scored)
+  lineinfile:
+    path: /etc/login.defs
+    state: present
+    regexp: '^PASS_MIN_DAYS'
+    line: 'PASS_MIN_DAYS	{{ cis_shadow_params["pass_min_days"] }}'
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - level1
+    - scored
+    - server
+    - workstation
+    - aaa
+    - user-accounts
+
+- name: 5.4.1.3 Ensure password expiration warning days is 7 or more (Scored)
+  lineinfile:
+    path: /etc/login.defs
+    state: present
+    regexp: '^PASS_WARN_AGE'
+    line: 'PASS_WARN_AGE	{{ cis_shadow_params["pass_warn_age"] }}'
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - level1
+    - scored
+    - server
+    - workstation
+    - aaa
+    - user-accounts
+
+#- name: 5.5.1.4 Ensure inactive password lock is 30 days or less (Scored)
+
+- name: 5.4.3 Ensure default group for the root account is GID 0 (Scored)
+  command: usermod -g 0 root
+  ignore_errors: true
+  changed_when: false
+  tags:
+    - level1
+    - server
+    - workstation
+    - aaa
+    - user-accounts
+
+- name: 5.4.4 Ensure default user umask is 027 or more restrictive (Scored) | /etc/login.defs
+  replace:
+    path: /etc/login.defs
+    regexp: '^UMASK.*'
+    replace: 'UMASK           {{ cis_default_user_mask }}'
+  tags:
+    - level1
+    - server
+    - workstation
+    - aaa
+    - user-accounts
+
+- name: 5.4.5 Ensure default user shell timeout is 900 seconds or less (Scored)
+  block:
+    - name: 5.4.5 Ensure default user shell timeout is 900 seconds or less (Scored) | Verify /etc/profile.d directory exists
+      stat:
+        path: /etc/profile.d
+      register: profile_d_dir_exists
+
+    - name: 5.4.5 Ensure default user shell timeout is 900 seconds or less (Scored) | Verify files under /etc/profile.d directory contains TMOUT
+      find:
+        path: /etc/profile.d
+        contains: '^\s*TMOUT='
+        recurse: true
+        follow: false
+      register: profile_d_files_tmout_exists
+      when: profile_d_dir_exists.stat.isdir is defined and profile_d_dir_exists.stat.isdir
+
+    - name: 5.4.5 Ensure default user shell timeout is 900 seconds or less (Scored) | Revmove existing TMOUT from /etc/profile
+      lineinfile:
+        path: /etc/profile
+        regexp: '^\s*TMOUT='
+        state: absent
+        create: false
+
+    - name: 5.4.5 Ensure default user shell timeout is 900 seconds or less (Scored) | Revmove existing TMOUT from /etc/profile.d files
+      lineinfile:
+        path: "{{ item.path }}"
+        regexp: '^\s*TMOUT='
+        state: absent
+        create: false
+      loop: "{{ profile_d_files_tmout_exists.files }}"
+      when: profile_d_files_tmout_exists.matched > 0
+
+    - name: 5.4.5 Ensure default user shell timeout is 900 seconds or less (Scored) | Add TMOUT
+      lineinfile:
+        path: /etc/profile
+        line: 'readonly TMOUT={{ cis_default_user_shell_timeout }} ; export TMOUT'
+        state: present
+        create: true
+        validate: bash -n %s
+  tags:
+    - level1
+    - server
+    - workstation
+    - aaa
+    - user-accounts

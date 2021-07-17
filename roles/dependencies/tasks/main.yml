@@ -55,6 +55,15 @@
     src: requirements.txt
     dest: /tmp/requirements.txt
 
+- name: Clean up breaking distutils files prior to installing pip packages
+  file:
+    path: "/usr/lib/python3/dist-packages/{{ item }}"
+    state: absent
+  loop:
+    - "PyYAML-5.3.1.egg-info"
+    - "pyasn1_modules"
+    - "pyasn1_modules-0.2.1.egg-info"
+
 - name: Install CAPE dependencies pip packages
   pip:
     requirements: /tmp/requirements.txt

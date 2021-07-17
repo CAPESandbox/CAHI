@@ -1,3 +1,11 @@
+2021-07-17
+
+  -- Role: Significant updates to CIS for Ubuntu role adding 58 compliance tasks across various sections.
+  -- Role: Update ClamAV role to replace ClamAV apparmor definitions.
+  -- Role: Update dependencies role to automate fixing 'Error 1: distutils' when running cape-vm scenario.
+  -- Role: Update dependencies role with updated requirements file.
+  -- Docs: Update documentation.
+
 2021-07-01
 
   -- Role: Add Section 1, Section 2 and partial Section 4 tasks for CIS for Ubuntu.
