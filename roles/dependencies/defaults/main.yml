@@ -2,6 +2,8 @@
 livepatch_enable: false
 livepatch_apitoken:
 
+repos:
+  - "deb http://security.ubuntu.com/ubuntu {{ ansible_distribution_release }}-security main"
 
 packages:
   - apparmor-utils
@@ -79,6 +81,8 @@ packages:
   - xvfb
   - zip
   - zlib1g-dev
+
+pip_requirements_file: https://raw.githubusercontent.com/kevoreilly/CAPEv2/master/requirements.in
 
 utf_locales:
   - "aa_DJ.UTF-8"

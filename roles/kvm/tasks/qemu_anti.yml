@@ -246,4 +246,295 @@
 
     # TO DO: Replace KVM_CPUID_FEATURES
 
+    - name: Prepare QEMU USB device HID - Manufacturer replacement facts
+      set_fact:
+        usb_hid_manufacturer_regex: |-
+                (\s+\[STR_MANUFACTURER\].*\")QEMU(\",)$
+        usb_hid_manufacturer_replacement: |-
+                {{ qemu_usb_model }}
+
+    - name: Replace QEMU USB device HID - Manufacturer
+      replace:
+        path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/hw/usb/dev-hid.c"
+        regexp: '{{ usb_hid_manufacturer_regex }}'
+        replace: '\1{{ usb_hid_manufacturer_replacement }}\2'
+
+    - name: Prepare QEMU USB device HID - Mouse replacement facts
+      set_fact:
+        usb_hid_mouse_regex: |-
+                (\s+\[STR_PRODUCT_MOUSE\].*\")QEMU(\sUSB\sMouse\",)$
+        usb_hid_mouse_replacement: |-
+                {{ qemu_usb_model }}
+
+    - name: Replace QEMU USB device HID - Mouse
+      replace:
+        path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/hw/usb/dev-hid.c"
+        regexp: '{{ usb_hid_mouse_regex }}'
+        replace: '\1{{ usb_hid_mouse_replacement }}\2'
+
+    - name: Prepare QEMU USB device HID - Tablet replacement facts
+      set_fact:
+        usb_hid_tablet_regex: |-
+                (\s+\[STR_PRODUCT_TABLET\].*\")QEMU(\sUSB\sTablet\",)$
+        usb_hid_tablet_replacement: |-
+                {{ qemu_usb_model }}
+
+    - name: Replace QEMU USB device HID - Tablet
+      replace:
+        path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/hw/usb/dev-hid.c"
+        regexp: '{{ usb_hid_tablet_regex }}'
+        replace: '\1{{ usb_hid_tablet_replacement }}\2'
+      
+    - name: Prepare QEMU USB device HID - Keyboard replacement facts
+      set_fact:
+        usb_hid_keyboard_regex: |-
+                (\s+\[STR_PRODUCT_KEYBOARD\].*\")QEMU(\sUSB\sKeyboard\",)$
+        usb_hid_keyboard_replacement: |-
+                {{ qemu_usb_model }}
+
+    - name: Replace QEMU USB device HID - Keyboard
+      replace:
+        path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/hw/usb/dev-hid.c"
+        regexp: '{{ usb_hid_keyboard_regex }}'
+        replace: '\1{{ usb_hid_keyboard_replacement }}\2'
+
+    - name: Prepare QEMU USB device Audio - Manufacturer replacement facts
+      set_fact:
+        usb_audio_manufacturer_regex: |-
+                (\s+\[STRING_MANUFACTURER\].*\")QEMU(\",)$
+        usb_audio_manufacturer_replacement: |-
+                {{ qemu_usb_model }}
+
+    - name: Replace QEMU USB device Audio - Manufacturer
+      replace:
+        path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/hw/usb/dev-audio.c"
+        regexp: '{{ usb_audio_manufacturer_regex }}'
+        replace: '\1{{ usb_audio_manufacturer_replacement }}\2'
+
+    - name: Prepare QEMU USB device Audio - Product replacement facts
+      set_fact:
+        usb_audio_product_regex: |-
+                (\s+\[STRING_PRODUCT\].*\")QEMU(\sUSB\sAudio\",)$
+        usb_audio_product_replacement: |-
+                {{ qemu_usb_model }}
+
+    - name: Replace QEMU USB device Audio - Product
+      replace:
+        path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/hw/usb/dev-audio.c"
+        regexp: '{{ usb_audio_product_regex }}'
+        replace: '\1{{ usb_audio_product_replacement }}\2'
+
+    - name: Prepare QEMU USB device Serial - Manufacturer replacement facts
+      set_fact:
+        usb_serial_manufacturer_regex: |-
+                (\s+\[STR_MANUFACTURER\].*\")QEMU(\",)$
+        usb_serial_manufacturer_replacement: |-
+                {{ qemu_usb_model }}
+
+    - name: Replace QEMU USB device Serial - Manufacturer
+      replace:
+        path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/hw/usb/dev-serial.c"
+        regexp: '{{ usb_serial_manufacturer_regex }}'
+        replace: '\1{{ usb_serial_manufacturer_replacement }}\2'
+
+    - name: Prepare QEMU USB device Serial - Product Serial replacement facts
+      set_fact:
+        usb_serial_product_serial_regex: |-
+                (\s+\[STR_PRODUCT_SERIAL\].*\")QEMU(\sUSB\sSERIAL\",)$
+        usb_serial_product_serial_replacement: |-
+                {{ qemu_usb_model }}
+
+    - name: Replace QEMU USB device Serial - Product Serial
+      replace:
+        path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/hw/usb/dev-serial.c"
+        regexp: '{{ usb_serial_product_serial_regex }}'
+        replace: '\1{{ usb_serial_product_serial_replacement }}\2'
+
+    - name: Prepare QEMU USB device Serial - Product Braille replacement facts
+      set_fact:
+        usb_serial_product_braille_regex: |-
+                (\s+\[STR_PRODUCT_BRAILLE\].*\")QEMU(\sUSB\sBAUM\sBRAILLE\",)$
+        usb_serial_product_braille_replacement: |-
+                {{ qemu_usb_model }}
+
+    - name: Replace QEMU USB device Serial - Product Braille
+      replace:
+        path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/hw/usb/dev-serial.c"
+        regexp: '{{ usb_serial_product_braille_regex }}'
+        replace: '\1{{ usb_serial_product_braille_replacement }}\2'
+
+    - name: Prepare QEMU USB device MTP
+      set_fact:
+        usb_mtp_regex: |-
+                (\s+uc->product_desc.*\")QEMU(\sUSB\sMTP\";)$
+        usb_mtp_replacement: |-
+                {{ qemu_usb_model }}
+
+    - name: Replace QEMU USB device MTP
+      replace:
+        path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/hw/usb/dev-mtp.c"
+        regexp: '{{ usb_mtp_regex }}'
+        replace: '\1{{ usb_mtp_replacement }}\2'
+
+
+    - name: Prepare QEMU USB device Hub - Manufacturer replacement facts
+      set_fact:
+        usb_hub_manufacturer_regex: |-
+                (\s+\[STR_MANUFACTURER\].*\")QEMU(\",)$
+        usb_hub_manufacturer_replacement: |-
+                {{ qemu_usb_model }}
+
+    - name: Replace QEMU USB device Hub - Manufacturer
+      replace:
+        path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/hw/usb/dev-hub.c"
+        regexp: '{{ usb_hub_manufacturer_regex }}'
+        replace: '\1{{ usb_hub_manufacturer_replacement }}\2'
+
+    - name: Prepare QEMU USB device Hub - Product replacement facts
+      set_fact:
+        usb_hub_product_regex: |-
+                (\s+\[STR_PRODUCT\].*\")QEMU(\sUSB\sHub\",)$
+        usb_hub_product_replacement: |-
+                {{ qemu_usb_model }}
+
+    - name: Replace QEMU USB device Hub - Product
+      replace:
+        path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/hw/usb/dev-hub.c"
+        regexp: '{{ usb_hub_product_regex }}'
+        replace: '\1{{ usb_hub_product_replacement }}\2'
+
+    # TO DO: Replace USB HUB SERIALNUMBER with random value
+
+    - name: Prepare QEMU USB device SmartCard - Product Description replacement facts
+      set_fact:
+        usb_smartcard_product_desc_regex: |-
+                ^(#define CCID_PRODUCT_DESCRIPTION\s+\")QEMU(\sUSB\sCCID\")
+        usb_smartcard_product_desc_replacement: |-
+                {{ qemu_usb_model }}
+
+    - name: Replace QEMU USB device SmartCard - Product Description
+      replace:
+        path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/hw/usb/dev-smartcard-reader.c"
+        regexp: '{{ usb_smartcard_product_desc_regex }}'
+        replace: '\1{{ usb_smartcard_product_desc_replacement }}\2'
+
+    - name: Prepare QEMU USB device SmartCard - Product Vendor replacement facts
+      set_fact:
+        usb_smartcard_product_vendor_regex: |-
+                ^(#define CCID_VENDOR_DESCRIPTION\s+\")QEMU(\")
+        usb_smartcard_product_vendor_replacement: |-
+                {{ qemu_usb_model }}
+
+    - name: Replace QEMU USB device SmartCard - Product Vendor
+      replace:
+        path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/hw/usb/dev-smartcard-reader.c"
+        regexp: '{{ usb_smartcard_product_vendor_regex }}'
+        replace: '\1{{ usb_smartcard_product_vendor_replacement }}\2'
+
+
+
+    - name: Prepare QEMU USB device Network - Manufacturer replacement facts
+      set_fact:
+        usb_network_manufacturer_regex: |-
+                (\s+\[STRING_MANUFACTURER\].*\")QEMU(\",)$
+        usb_network_manufacturer_replacement: |-
+                {{ qemu_usb_model }}
+
+    - name: Replace QEMU USB device Network - Manufacturer
+      replace:
+        path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/hw/usb/dev-network.c"
+        regexp: '{{ usb_network_manufacturer_regex }}'
+        replace: '\1{{ usb_network_manufacturer_replacement }}\2'
+
+    - name: Prepare QEMU USB device Network - Product replacement facts
+      set_fact:
+        usb_network_product_regex: |-
+                (\s+\[STRING_PRODUCT\].*\"RNDIS\/)QEMU(\sUSB\sNetwork\sDevice\",)$
+        usb_network_product_replacement: |-
+                {{ qemu_usb_model }}
+
+    - name: Replace QEMU USB device Network - Product
+      replace:
+        path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/hw/usb/dev-network.c"
+        regexp: '{{ usb_network_product_regex }}'
+        replace: '\1{{ usb_network_product_replacement }}\2'
+
+    - name: Prepare QEMU USB device Network - Data replacement facts
+      set_fact:
+        usb_network_data_regex: |-
+                (\s+\[STRING_DATA\].*\")QEMU(\sUSB\sNet\sData\sInterface\",)$
+        usb_network_data_replacement: |-
+                {{ qemu_usb_model }}
+
+    - name: Replace QEMU USB device Network - Data
+      replace:
+        path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/hw/usb/dev-network.c"
+        regexp: '{{ usb_network_data_regex }}'
+        replace: '\1{{ usb_network_data_replacement }}\2'
+
+    - name: Prepare QEMU USB device Network - Control replacement facts
+      set_fact:
+        usb_network_control_regex: |-
+                (\s+\[STRING_CONTROL\].*\")QEMU(\sUSB\sNet\sControl\sInterface\",)$
+        usb_network_control_replacement: |-
+                {{ qemu_usb_model }}
+
+    - name: Replace QEMU USB device Network - Control
+      replace:
+        path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/hw/usb/dev-network.c"
+        regexp: '{{ usb_network_control_regex }}'
+        replace: '\1{{ usb_network_control_replacement }}\2'
+
+    - name: Prepare QEMU USB device Network - RNDIS Control replacement facts
+      set_fact:
+        usb_network_rndis_control_regex: |-
+                (\s+\[STRING_RNDIS_CONTROL\].*\")QEMU(\sUSB\sNet\sRNDIS\sControl\sInterface\",)$
+        usb_network_rndis_control_replacement: |-
+                {{ qemu_usb_model }}
+
+    - name: Replace QEMU USB device Network - RNDIS Control
+      replace:
+        path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/hw/usb/dev-network.c"
+        regexp: '{{ usb_network_rndis_control_regex }}'
+        replace: '\1{{ usb_network_rndis_control_replacement }}\2'
+
+    - name: Prepare QEMU USB device Network - CDC replacement facts
+      set_fact:
+        usb_network_cdc_regex: |-
+                (\s+\[STRING_CDC\].*\")QEMU(\sUSB\sNet\sCDC\",)$
+        usb_network_cdc_replacement: |-
+                {{ qemu_usb_model }}
+
+    - name: Replace QEMU USB device Network - CDC
+      replace:
+        path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/hw/usb/dev-network.c"
+        regexp: '{{ usb_network_cdc_regex }}'
+        replace: '\1{{ usb_network_cdc_replacement }}\2'
+
+    - name: Prepare QEMU USB device Network - Subset replacement facts
+      set_fact:
+        usb_network_subset_regex: |-
+                (\s+\[STRING_SUBSET\].*\")QEMU(\sUSB\sNet\sSubset\",)$
+        usb_network_subset_replacement: |-
+                {{ qemu_usb_model }}
+
+    - name: Replace QEMU USB device Network - Subset
+      replace:
+        path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/hw/usb/dev-network.c"
+        regexp: '{{ usb_network_subset_regex }}'
+        replace: '\1{{ usb_network_subset_replacement }}\2'
+
+    - name: Prepare QEMU USB device Network - RNDIS replacement facts
+      set_fact:
+        usb_network_rndis_regex: |-
+                (\s+\[STRING_RNDIS\].*\")QEMU(\sUSB\sNet\sRNDIS\",)$
+        usb_network_rndis_replacement: |-
+                {{ qemu_usb_model }}
+
+    - name: Replace QEMU USB device Network - RNDIS
+      replace:
+        path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/hw/usb/dev-network.c"
+        regexp: '{{ usb_network_rndis_regex }}'
+        replace: '\1{{ usb_network_rndis_replacement }}\2'
+
   when: enable_extra_mod

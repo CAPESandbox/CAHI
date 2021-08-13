@@ -1,4 +1,10 @@
 ---
+- name: Add Ubuntu security repository
+  apt_repository:
+    repo: "deb http://security.ubuntu.com/ubuntu {{ ansible_distribution_release }}-security main"
+    state: present
+    update_cache: true
+
 - name: Update packages to lastest version
   apt:
     upgrade: dist
@@ -50,10 +56,15 @@
     state: latest
     executable: pip3
 
-- name: Copy pip requirements file
-  copy:
-    src: requirements.txt
+- name: Download CAPE pip requirements file
+  get_url:
+    url: "{{ pip_requirements_file }}"
     dest: /tmp/requirements.txt
+
+#- name: Copy pip requirements file
+#  copy:
+#    src: requirements.txt
+#    dest: /tmp/requirements.txt
 
 - name: Clean up breaking distutils files prior to installing pip packages
   file:
