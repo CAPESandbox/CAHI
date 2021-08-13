@@ -21,6 +21,7 @@ suricata_config:
   request_body_limit: 0
   response_body_limit: 0
   unix_socket_file: /var/run/suricata/suricata-command.socket
+  enable_file_store: true
 
 suricata_update_timer:
   calender: "*:0/15"

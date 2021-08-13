@@ -37,6 +37,18 @@
     src: update.yaml.j2
     dest: "{{ suricata_main_dir }}/update.yaml"
 
+- name: Verify suricata-update exists | /ust/local/bin/suricate-update
+  stat:
+    path: "{{ suricata_update_bin_dir }}/suricata-update"
+  register: suricata_update_bin_local
+
+# On latest install (or when installing on VM not docker)
+# the path to suricata-update binary is different
+- name: Verify suricata-update exists | /usr/bin/suricata-update
+  stat:
+    path: /usr/bin/suricata-update
+  register: suricata_update_bin_nonlocal
+
 # suricata-update still dumps suricata rules
 # file to /var/lib/suricata/rules/suricata.rules
 # regardless of what 'default-rule-path' is!
@@ -44,9 +56,17 @@
 # must update suricata config first, otherwise
 # it will fail because it is not able to find
 # suricata.rules
-- name: Update Suricata rules
+- name: Update Suricata rules | /ust/local/bin/suricate-update
   command:
     cmd: "{{ suricata_update_bin_dir }}/suricata-update -o {{ suricata_main_dir }}/rules --no-test"
+  when: suricata_update_bin_local.stat.exists | bool
+
+# On latest install (or when installing on VM not docker)
+# the path to suricata-update is different
+- name: Update Suricata rules | /usr/bin/suricata-update
+  command:
+    cmd: "/usr/bin/suricata-update -o {{ suricata_main_dir }}/rules --no-test"
+  when: suricata_update_bin_nonlocal.stat.exists | bool
 
 # 1) Slurping vs. Templating
 #    We can 'slurp' suricata.yaml, but it is a big file
@@ -59,11 +79,21 @@
 # 2) --user root is just to make the validation 
 #    test succeed, othwerwise it will fail with
 #    permission denied
+# 3) For some reason, validation is taking place
+#    before actually templating the file, causing
+#    errors since custom paths are not reflected!
+#    so we manually validate the config in a 
+#    separate task.
 - name: Template Suricata configuration file
   template:
     src: suricata.yaml.j2
     dest: "{{ suricata_main_dir }}/suricata.yaml"
-    validate: "{{ suricata_bin_dir }}/suricata --user root -T %s"
+    #validate: "{{ suricata_bin_dir }}/suricata --user root -T %s"
+
+- name: Validate Suricata configuration file
+  command:
+    cmd: "{{ suricata_bin_dir }}/suricata --user root -T {{ suricata_main_dir }}/suricata.yaml"
+  changed_when: false
 
 - name: Template Suricata update systemd service
   template:

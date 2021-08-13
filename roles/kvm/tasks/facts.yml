@@ -61,6 +61,11 @@
         intel_cpuid: "{{ item }}"
       with_random_choice: "{{ kvm_intel_cpuid_signatures }}"
 
+    - name: Randomly set QEMU USB devices model
+      set_fact:
+        qemu_usb_model: "{{ item }}"
+      with_random_choice: "{{ qemu_usb_models }}"
+
   when:
     - kvm_cpu_randomization | bool
     - not kvm_cpu_randomization_extra | bool

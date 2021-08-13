@@ -1,6 +1,6 @@
 %YAML 1.1
 ---
-
+# Templated by Ansible
 # Suricata configuration file. In addition to the comments describing all
 # options in this file, full documentation can be found at:
 # https://suricata.readthedocs.io/en/latest/configuration/suricata-yaml.html
@@ -444,7 +444,7 @@ outputs:
   # prune" command which can delete files over a certain age.
   - file-store:
       version: 2
-      enabled: yes
+      enabled: no
 
       # Set the directory for the filestore. Relative pathnames
       # are contained within the "default-log-dir".

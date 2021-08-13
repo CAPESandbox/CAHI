@@ -1,3 +1,9 @@
+2021-08-13
+
+  -- Role: Update KVM role incorporating additional QEMU Anti-VM countermeasures (by @doomedraven).
+  -- Role: Update Suricata role to accommodate installation changes from upstream.
+  -- Role: Update dependencies role to pull requirements file from upstream repo. It is no longer separately maintained.
+
 2021-07-17
 
   -- Role: Significant updates to CIS for Ubuntu role adding 58 compliance tasks across various sections.

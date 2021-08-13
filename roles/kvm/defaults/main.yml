@@ -67,7 +67,7 @@ kvm_intel_cpuid_signatures:
   - "0x00050657"
   - "0x000906EC"
 
-kvm_amd_cpu_name: []
+kvm_amd_cpu_names: []
 
 hd_models:
   - "SAMSUNG MZ-76E120"
@@ -192,10 +192,14 @@ qemu_build_config_options:
   - enable-tools
   - enable-capstone
 
+qemu_usb_models:
+  - "DELL"
+  - "HP"
+
 seabios_repo_url: https://github.com/coreboot/seabios.git
 seabios_source_dir: /tmp
 
-libvirt_version: 7.4.0
+libvirt_version: 7.6.0
 libvirt_download_url: https://libvirt.org/sources
 libvirt_source_dir: /tmp
 libvirt_apt_packages:
@@ -241,6 +245,9 @@ libvirt_pip_packages:
   - flake8
   - meson==0.57.2
 
+libvirt_meson_core_options:
+  - "buildtype=plain"
+  #- "auto-features=enabled"
 libvirt_meson_build_options:
   - "system=true"
   - "driver_remote=enabled"
@@ -248,6 +255,22 @@ libvirt_meson_build_options:
   - "driver_libvirtd=enabled"
   - "qemu_group=libvirt"
   - "qemu_user=root"
+  - "apparmor=enabled"
   - "secdriver_apparmor=enabled"
-  - "apparmor_profiles=true"
+  - "apparmor_profiles=enabled"
   - "bash_completion=auto"
+  - "driver_esx=disabled"
+  - "driver_hyperv=disabled"
+  - "driver_openvz=disabled"
+  - "driver_vbox=disabled"
+  - "driver_vmware=disabled"
+  - "driver_vz=disabled"
+  - "driver_bhyve=disabled"
+  - "driver_libxl=disabled"
+  - "driver_lxc=disabled"
+  - "openwsman=disabled"
+  - "driver_interface=enabled"
+  - "driver_network=enabled"
+  - "selinux=disabled"
+  - "fuse=disabled"
+  - "init_script=systemd"
