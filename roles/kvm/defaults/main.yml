@@ -102,7 +102,7 @@ dvd_models:
   - "HL-PV-SG WB4"
   - "HL-PQ-SV WB8"
 
-qemu_version: 6.0.0
+qemu_version: 6.1.0
 qemu_download_url: https://download.qemu.org
 qemu_source_dir: /tmp
 qemu_prefix_dir: /usr
@@ -157,6 +157,7 @@ qemu_apt_packages:
   - uml-utilities
   - cpanminus
   - libjemalloc-dev
+  - python3-sphinx-rtd-theme
 qemu_pip_packages:
   - sphinx
   - ninja
