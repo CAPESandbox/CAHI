@@ -121,6 +121,86 @@ To destroy this scenario
 $ molecule destroy --scenario-name cape-vm
 ```
 
+## Vagrant with KVM/QEMU/Libvirt as Development Platform (Experimental)
+
+1. Install Vagrant
+
+```bash
+$ curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+$ sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+$ sudo apt-get update && sudo apt-get install vagrant
+```
+
+2. Install QEMU/Libvirt/KVM and vagrant-libvirt plugin requirements
+
+```bash
+$ sudo apt-get build-dep vagrant ruby-libvirt
+$ sudo apt-get install qemu qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils ebtables dnsmasq-base virt-manager
+$ sudo apt-get install libxslt-dev libxml2-dev libvirt-dev zlib1g-dev ruby-dev
+$ sudo apt-get install libguestfs-tools
+$ sudo usermod -aG libvirt-qemu ${USER}
+```
+
+3. Install vagrant-libvirt plugin
+
+```bash
+$ vagrant plugin install vagrant-libvirt
+```
+
+4. Install requirements
+
+```bash
+$ pip3 install ansible==2.9.25 molecule python-vagrant molecule-vagrant ansible-lint --user
+```
+
+Replace molecule/cape-vm/molecule.yml with below:
+
+```yaml
+---
+scenario:
+  name: cape-vm
+
+driver:
+  name: vagrant
+  provider:
+    name: libvirt
+    options:
+      cpu_mode: "host-passthrough"
+      machine_type: "pc-q35-focal"
+lint: |
+  set -e
+  yamllint .
+  ansible-lint main.yml
+platforms:
+  - name: cape-ubuntu-vm
+    hostname: cape-ubuntu-vm
+    box: generic/ubuntu2004
+    cpus: 4
+    # cpu_mode / topology does not appear to apply
+    # See: https://github.com/vagrant-libvirt/vagrant-libvirt/issues/975
+    cpu_mode: "host-passthrough"
+    memory: 4096
+    nested: true
+    instance_raw_config_args:
+      - "vm.network 'forwarded_port', guest: 80, host: 8080"
+      - "vm.network 'forwarded_port', guest: 443, host: 8443"
+provisioner:
+  name: ansible
+  config_options:
+    ssh_connection:
+      pipelining: true
+  inventory:
+    #host_vars:
+    #  cape-vm-ubuntu2004:
+    #    ansible_user: ansible
+    links:
+      group_vars: ../../group_vars
+  env:
+    ANSIBLE_ROLES_PATH: ../../roles
+verifier:
+  name: ansible
+```
+
 ## Development Cheatsheets
 
 1. To login to the created docker image for testing and debugging

@@ -1,0 +1,299 @@
+---
+####################################################
+# 4 Logging and Auditing
+#   4.1 Configure System Accounting
+#       4.1.1 Ensure Auditing is Enabled
+####################################################
+- name: 4.1.1.1 Ensure auditd is installed (Scored)
+  apt:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - auditd
+    - audispd-plugins
+
+- name: Inventory system services
+  service_facts: null
+
+- name: 4.1.1.2 Ensure auditd service is enabled (Scored)
+  systemd:
+    name: auditd.service
+    enabled: true
+    state: restarted
+  when: ansible_facts.services['auditd.service'] is defined
+
+- name: 4.1.1.3 Ensure auditing for processes that start prior to auditd is enabled (Automated)
+  lineinfile:
+    path: /etc/default/grub
+    state: present
+    backrefs: true
+    regexp: '^(GRUB_CMDLINE_LINUX=(?!.*audit=)\"[^\"]+)(\".*)'
+    line: '\1 audit=1\2'
+
+- name: 4.1.1.4 Ensure audit_backlog_limit is sufficient (Automated)
+  lineinfile:
+    path: /etc/default/grub
+    state: present
+    backrefs: true
+    regexp: '^(GRUB_CMDLINE_LINUX=(?!.*audit_backlog_limit=)\"[^\"]+)(\".*)'
+    line: '\1 audit_backlog_limit={{ cis_auditd_backlog_limit }}\2'
+
+####################################################
+# 4 Logging and Auditing
+#   4.1 Configure System Accounting
+#       4.1.2 Configure Data Retention
+####################################################
+- name: |
+    4.1.2.1 Ensure audit log storage size is configured (Scored)
+    4.1.2.2 Ensure audit logs are not automatically deleted (Scored)
+    4.1.2.3 Ensure system is disabled when audit logs are full (Scored)
+  template:
+    src: auditd/auditd.conf.j2
+    dest: /etc/audit/auditd.conf
+    backup: true
+    owner: root
+    group: root
+    mode: 0640
+
+- name: 4.1.3 Ensure events that modify date and time information are collected (Scored)
+  template:
+    src: auditd/cis-4.1.3-time-change.rules.j2
+    dest: "{{ cis_audit_rules_path }}/cis-4.1.3-time-change.rules"
+    owner: root
+    group: root
+    mode: 0600
+  tags:
+    - level2
+    - scored
+    - server
+    - workstation
+    - logging-auditing
+    - auditd
+
+- name: 4.1.4 Ensure events that modify user/group information are collected (Scored)
+  template:
+    src: auditd/cis-4.1.4-identity.rules.j2
+    dest: "{{ cis_audit_rules_path }}/cis-4.1.4-identity.rules"
+    owner: root
+    group: root
+    mode: 0600
+  tags:
+    - level2
+    - scored
+    - server
+    - workstation
+    - logging-auditing
+    - auditd
+
+- name: 4.1.5 Ensure events that modify the system's network environment are collected (Scored)
+  template:
+    src: auditd/cis-4.1.5-system-locale.rules.j2
+    dest: "{{ cis_audit_rules_path }}/cis-4.1.5-system-locale.rules"
+    owner: root
+    group: root
+    mode: 0600
+  tags:
+    - level2
+    - scored
+    - server
+    - workstation
+    - logging-auditing
+    - auditd
+
+- name: 4.1.6 Ensure events that modify the system's Mandatory Access Controls are collected (Scored)
+  template:
+    src: auditd/cis-4.1.6-mac-policy.rules.j2
+    dest: "{{ cis_audit_rules_path }}/cis-4.1.6-mac-policy.rules"
+    owner: root
+    group: root
+    mode: 0600
+  tags:
+    - level2
+    - scored
+    - server
+    - workstation
+    - logging-auditing
+    - auditd
+
+- name: 4.1.7 Ensure login and logout events are collected (Scored)
+  template:
+    src: auditd/cis-4.1.7-logins.rules.j2
+    dest: "{{ cis_audit_rules_path }}/cis-4.1.7-logins.rules"
+    owner: root
+    group: root
+    mode: 0600
+  tags:
+    - level2
+    - scored
+    - server
+    - workstation
+    - logging-auditing
+    - auditd
+
+- name: 4.1.8 Ensure session initiation information is collected (Scored)
+  template:
+    src: auditd/cis-4.1.8-sessions.rules.j2
+    dest: "{{ cis_audit_rules_path }}/cis-4.1.8-sessions.rules"
+    owner: root
+    group: root
+    mode: 0600
+  tags:
+    - level2
+    - scored
+    - server
+    - workstation
+    - logging-auditing
+    - auditd
+
+- name: 4.1.9 Ensure discretionary access control permission modification events are collected (Scored)
+  template:
+    src: auditd/cis-4.1.9-perm-mod.rules.j2
+    dest: "{{ cis_audit_rules_path }}/cis-4.1.9-perm-mod.rules"
+    owner: root
+    group: root
+    mode: 0600
+  tags:
+    - level2
+    - scored
+    - server
+    - workstation
+    - logging-auditing
+    - auditd
+
+- name: 4.1.10 Ensure unsuccessful unauthorized file access attempts are collected (Scored)
+  template:
+    src: auditd/cis-4.1.10-access.rules.j2
+    dest: "{{ cis_audit_rules_path }}/cis-4.1.10-access.rules"
+    owner: root
+    group: root
+    mode: 0600
+  tags:
+    - level2
+    - scored
+    - server
+    - workstation
+    - logging-auditing
+    - auditd
+
+- name: 4.1.12 Ensure successful file system mounts are collected (Scored)
+  template:
+    src: auditd/cis-4.1.12-mounts.rules.j2
+    dest: "{{ cis_audit_rules_path }}/cis-4.1.12-mounts.rules"
+    owner: root
+    group: root
+    mode: 0600
+  tags:
+    - level2
+    - scored
+    - server
+    - workstation
+    - logging-auditing
+    - auditd
+
+- name: 4.1.13 Ensure file deletion events by users are collected (Scored)
+  template:
+    src: auditd/cis-4.1.13-delete.rules.j2
+    dest: "{{ cis_audit_rules_path }}/cis-4.1.13-delete.rules"
+    owner: root
+    group: root
+    mode: 0600
+  tags:
+    - level2
+    - scored
+    - server
+    - workstation
+    - logging-auditing
+    - auditd
+
+- name: 4.1.14 Ensure changes to system administration scope (sudoers) is collected (Scored)
+  template:
+    src: auditd/cis-4.1.14-scope.rules.j2
+    dest: "{{ cis_audit_rules_path }}/cis-4.1.14-scope.rules"
+    owner: root
+    group: root
+    mode: 0600
+  tags:
+    - level2
+    - scored
+    - server
+    - workstation
+    - logging-auditing
+    - auditd
+
+- name: 4.1.15 Ensure system administrator command executions (sudo) are collected (Scored)
+  template:
+    src: auditd/cis-4.1.15-sudo-log.rules.j2
+    dest: "{{ cis_audit_rules_path }}/cis-4.1.15-sudo-log.rules"
+    owner: root
+    group: root
+    mode: 0600
+  tags:
+    - level2
+    - scored
+    - server
+    - workstation
+    - logging-auditing
+    - auditd
+  
+- name: 4.1.16 Ensure kernel module loading and unloading is collected (Scored)
+  template:
+    src: auditd/cis-4.1.16-modules.rules.j2
+    dest: "{{ cis_audit_rules_path }}/cis-4.1.16-modules.rules"
+    owner: root
+    group: root
+    mode: 0600
+  tags:
+    - level2
+    - scored
+    - server
+    - workstation
+    - logging-auditing
+    - auditd
+
+- name: 4.1.17 Ensure the audit configuration is immutable (Scored)
+  template:
+    src: auditd/cis-4.1.17-finalize.rules.j2
+    dest: "{{ cis_audit_rules_path }}/99-finalize.rules"
+    owner: root
+    group: root
+    mode: 0600
+  tags:
+    - level2
+    - scored
+    - server
+    - workstation
+    - logging-auditing
+    - auditd
+
+####################################################
+# 4 Logging and Auditing
+#   4.2 Configure Logging
+#       4.2.1 Configure rsyslog
+####################################################
+- name: 4.2.1.1 Ensure rsyslog is installed (Scored)
+  apt:
+    name: rsyslog
+    state: present
+  tags:
+    - level1
+    - scored
+    - server
+    - workstation
+    - logging-auditing
+    - rsyslog
+
+- name: Inventory system services
+  service_facts: null
+
+- name: 4.2.1.2 Ensure rsyslog Service is enabled (Scored)
+  systemd:
+    name: rsyslog.service
+    enabled: true
+  when: ansible_facts.services['rsyslog.service'] is defined
+  tags:
+    - level1
+    - scored
+    - server
+    - workstation
+    - logging-auditing
+    - rsyslog

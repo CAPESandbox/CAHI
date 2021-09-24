@@ -1,0 +1,56 @@
+---
+- name: Install Cockpit dependency packages
+  apt:
+    name: "{{ cockpit_packages }}"
+    state: present
+
+- name: Download Cockpit source code
+  git:
+    repo: "{{ cockpit_repo_url }}"
+    dest: "{{ cockpit_temp_dir }}/cockpit"
+
+- name: Autogen Cockpit source code
+  command:
+    cmd: ./autogen.sh --prefix=/usr --disable-doc
+    chdir: "{{ cockpit_temp_dir }}/cockpit"
+
+# Revise to use checkinstall
+# To-Do: Fix version number = "-1"
+- name: Install Cockpit
+  make:
+    chdir: "{{ cockpit_temp_dir }}/cockpit"
+    target: install
+    params:
+      NUM_THREADS: "{{ ansible_processor_cores / 2 | int }}"
+
+- name: Download Cockpit Machines source code
+  git:
+    repo: "{{ cockpit_machines_repo_url }}"
+    dest: "{{ cockpit_temp_dir }}/cockpit-machines"
+
+- name: Install Cockpit Machines
+  make:
+    chdir: "{{ cockpit_temp_dir }}/cockpit-machines"
+    target: install
+
+# TO-DO: Add task to fix 'Cannot refresh cache whilst offline'
+# https://github.com/cockpit-project/cockpit/issues/8477#issuecomment-630124971
+
+# TO-DO: Add task to reverse-proxy cockpit with nginx
+# https://github.com/cockpit-project/cockpit/issues/1803
+# https://github.com/cockpit-project/cockpit/wiki/Proxying-Cockpit-over-nginx
+# https://www.freesoftwareservers.com/display/FREES/Reverse+Proxy+Cockpit+over+NGinX
+
+# TO-DO: Add task to setup google-authenticator MFA for cockpit
+# https://vincentverhagen.nl/2017/11/fedora-cockpit-two-factor-authentication-2fa/
+# https://community.nethserver.org/t/2fa-or-two-factor-authentication-with-cockpit/14172
+
+- name: Inventory system services
+  service_facts: null
+
+- name: Enable and start Cockpit service
+  systemd:
+    name: cockpit.service
+    enabled: true
+    state: restarted
+  when: ansible_facts.services['cockpit.service'] is defined

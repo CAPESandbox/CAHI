@@ -1,5 +1,5 @@
 ---
-- name: Replace HD information in Qemu source code
+- name: Replace HD information in QEMU source code
   replace:
     path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/hw/{{ item }}"
     regexp: '(\s+.*\")QEMU HARDDISK(\"\);)$'
@@ -8,7 +8,7 @@
     - "ide/core.c"
     - "scsi/scsi-disk.c"
 
-- name: Replace DVD information in Qemu source code
+- name: Replace DVD information in QEMU source code
   replace:
     path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/hw/{{ item }}"
     regexp: '(\s+.*\")QEMU DVD-ROM(\"\);)$'
@@ -17,7 +17,7 @@
     - "ide/core.c"
     - "ide/atapi.c"
 
-- name: Replace CD information in Qemu source code
+- name: Replace CD information in QEMU source code
   replace:
     path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/hw/{{ item }}"
     regexp: '(\s+.*\")QEMU CD-ROM(\"\);)$'
@@ -25,7 +25,7 @@
   loop:
     - "scsi/scsi-disk.c"
 
-- name: Replace PenPartner in Qemu source code
+- name: Replace PenPartner in QEMU source code
   replace:
     path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/hw/usb/dev-wacom.c"
     regexp: '{{ item }}'
@@ -34,82 +34,84 @@
     - '(\s+.*\")QEMU(\sPenPartner Tablet\";)$'
     - '(\s+.*\")QEMU(\sPenPartner tablet\"\);)$'
 
-- name: Replace Microdrive in Qemu source code
+- name: Replace Microdrive in QEMU source code
   replace:
     path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/hw/ide/core.c"
     regexp: '(\s+.*\")QEMU(\sMICRODRIVE\"\);)$'
     replace: '\1<{{ woot }}>\2'
 
-- name: Replace vendor strdup in Qemu source code
+- name: Replace vendor strdup in QEMU source code
   replace:
     path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/hw/scsi/scsi-disk.c"
     regexp: '(\s+.*\")QEMU(\"\);)$'
     replace: '\1<{{ woot }}>\2'
 
-- name: Replace KVMKVMKVM in Qemu source code
+- name: Replace KVMKVMKVM in QEMU source code
   replace:
     path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/target/i386/kvm/kvm.c"
     regexp: '(\s+.*\")KVMKVMKVM\\0\\0\\0(\",\s+\d+\);)$'
     replace: '\1{{ intel_hypervisor_type }}\2'
 
-- name: Replace QEMU buff in Qemu source code
+- name: Replace QEMU buff in QEMU source code
   replace:
     path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/hw/ide/atapi.c"
     regexp: '(\s+.*\")QEMU(\"\);)$'
     replace: '\1<{{ woot }}>\2'
 
-- name: Replace bochs in Qemu source code
+- name: Replace bochs in QEMU source code
   replace:
     path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/block/bochs.c"
     regexp: '(\s+.*=\s\")bochs(\",)$'
     replace: '\1<{{ woot }}>\2'
 
-- name: Replace BOCHS in Qemu source code
+- name: Replace BOCHS in QEMU source code
   replace:
     path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/include/hw/acpi/aml-build.h"
-    regexp: '(^#define ACPI_BUILD_APPNAME6\s\")BOCHS\s(\")$'
-    replace: '\1ALASKA\2'
+    regexp: '(^#define ACPI_BUILD_APPNAME6\s\")BOCHS(\s\")$'
+    replace: '\1{{ lookup("password", "/dev/null chars=ascii_uppercase length=5") }}\2'
+    #replace: '\1ALASKA\2'
 
-- name: Replace Bochs NIC adapter in Qemu source code
+- name: Replace Bochs NIC adapter in QEMU source code
   replace:
     path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/roms/ipxe/src/drivers/net/pnic.c"
     regexp: '(^PCI_ROM\s\(.*\")Bochs Pseudo(\sNIC\sAdaptor\",\s0\s\),)$'
     replace: '\1Intel RealTime\2'
 
 # Modifications below are not in kvm-qemu.sh
-- name: Extra Qemu Source Code Modifications
+- name: Extra QEMU Source Code Modifications
   block:
-    - name: Extra - Replace BXPC in Qemu source code (aml-build.h)
+    - name: Extra - Replace BXPC in QEMU source code (aml-build.h)
       replace:
         path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/include/hw/acpi/aml-build.h"
-        regexp: '(^#define ACPI_BUILD_APPNAME8\s\")BXPC\s+(\")$'
-        replace: '\1RCKS\2'
+        regexp: '(^#define ACPI_BUILD_APPNAME8\s\")BXPC(\s+\")$'
+        replace: '\1{{ lookup("password", "/dev/null chars=ascii_uppercase length=4") }}\2'
+        #replace: '\1RCKS\2'
 
-    - name: Extra - Replace OVMF in Qemu source code (Dsdt.asl)
+    - name: Extra - Replace OVMF in QEMU source code (Dsdt.asl)
       replace:
         path:  "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/roms/edk2/OvmfPkg/AcpiTables/Dsdt.asl"
         regexp: '^(DefinitionBlock\s\("Dsdt\.aml",\s"DSDT",\s1,\s"INTEL\s",\s")OVMF(\s+",\s4\)\s\{)'
         replace: '\1{{ woot }}\2'
 
-    - name: Extra - Replace OVMF in Qemu source code (Ssdt.asl)
+    - name: Extra - Replace OVMF in QEMU source code (Ssdt.asl)
       replace:
         path:  "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/roms/edk2/OvmfPkg/AcpiTables/Ssdt.asl"
         regexp: '^(DefinitionBlock\s\("Ssdt\.aml",\s"SSDT",\s1,\s")REDHAT",\s"OVMF(\s+",\s1\)\s\{)'
         replace: '\1<{{ woot }}>", "{{ woot }}\2'
 
-    - name: Extra - Replace Vendor TYPE0_STRINGS in Qemu source code (SmbiosPlatformDxe.c)
+    - name: Extra - Replace Vendor TYPE0_STRINGS in QEMU source code (SmbiosPlatformDxe.c)
       replace:
         path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/roms/edk2/OvmfPkg/SmbiosPlatformDxe/SmbiosPlatformDxe.c"
         regexp: '^(\s+")EFI\sDevelopment\sKit\sII\s\/\sOVMF(\\\d"\s+\/\*\sVendor\s\*\/\s\\)'
         replace: '\1American Megatrends Inc. {{ woot }}\2'
 
-    - name: Extra - Replace BiosVersion TYPE0_STRINGS in Qemu source code (SmbiosPlatformDxe.c)
+    - name: Extra - Replace BiosVersion TYPE0_STRINGS in QEMU source code (SmbiosPlatformDxe.c)
       replace:
         path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/roms/edk2/OvmfPkg/SmbiosPlatformDxe/SmbiosPlatformDxe.c"
         regexp: '^(\s+")\d\.\d\.\d(\\\d"\s+\/\*\sBiosVersion\s\*\/\s\\)'
         replace: '\g<1>{{ 3 | random(1) }}.{{ 9 | random(1) }}.{{ 9 | random(1) }}\2'
 
-    - name: Extra - Replace BiosReleaseDate TYPE0_STRINGS in Qemu source code (SmbiosPlatformDxe.c)
+    - name: Extra - Replace BiosReleaseDate TYPE0_STRINGS in QEMU source code (SmbiosPlatformDxe.c)
       replace:
         path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/roms/edk2/OvmfPkg/SmbiosPlatformDxe/SmbiosPlatformDxe.c"
         regexp: '^(\s+")\d+\/\d+\/\d+(\\\d"\s+\/\*\sBiosReleaseDate\s\*\/)'
@@ -123,7 +125,7 @@
         efi_acpi_oem_id_replacement: |-
                 {{ woot | list | string | regex_replace('^\[(.*)\]$', '\1') | regex_replace('\s') }}
 
-    - name: Extra - Replace EFI_ACPI_OEM_ID Qemu source code (Platform.h)
+    - name: Extra - Replace EFI_ACPI_OEM_ID QEMU source code (Platform.h)
       replace:
         path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/roms/edk2/OvmfPkg/AcpiTables/Platform.h"
         regexp: '{{ efi_acpi_oem_id_regex }}'
@@ -136,7 +138,7 @@
         efi_acpi_oem_tableid_replacement: |-
                 {{ woot | list | string | regex_replace('^\[(.*)\]$', '\1') | regex_replace('\s') + woot | list | string | regex_replace('^\[(.*)\]$', '\1') | regex_replace('\s') }}
 
-    - name: Extra - Replace EFI_ACPI_OEM_TABLE_ID Qemu source code (Platform.h)
+    - name: Extra - Replace EFI_ACPI_OEM_TABLE_ID QEMU source code (Platform.h)
       replace:
         path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/roms/edk2/OvmfPkg/AcpiTables/Platform.h"
         regexp: '{{ efi_acpi_oem_tableid_regex }}'
@@ -149,7 +151,7 @@
         efi_acpi_oem_revision_replacement: |-
                 {{ "%04d" | format(2021 | random(2013)) | string + "%04d" | format(2000 | random(0)) | string }}
 
-    - name: Extra - Replace EFI_ACPI_OEM_REVISION Qemu source code (Platform.h)
+    - name: Extra - Replace EFI_ACPI_OEM_REVISION QEMU source code (Platform.h)
       replace:
         path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/roms/edk2/OvmfPkg/AcpiTables/Platform.h"
         regexp: '{{ efi_acpi_oem_revision_regex }}'
@@ -162,7 +164,7 @@
         efi_acpi_creatorid_replacement: |-
                 {{  woot | list | string | regex_replace('^\[(.*)\]$', '\1') | regex_replace('\s') }}
 
-    - name: Extra - Replace EFI_ACPI_CREATOR_ID Qemu source code (Platform.h)
+    - name: Extra - Replace EFI_ACPI_CREATOR_ID QEMU source code (Platform.h)
       replace:
         path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/roms/edk2/OvmfPkg/AcpiTables/Platform.h"
         regexp: '{{ efi_acpi_creatorid_regex }}'
@@ -175,7 +177,7 @@
         efi_acpi_creator_revision_replacement: |-
                 {{ "%02d" | format(99 | random(90)) | string }}
 
-    - name: Extra - Replace EFI_ACPI_CREATOR_REVISION Qemu source code (Platform.h)
+    - name: Extra - Replace EFI_ACPI_CREATOR_REVISION QEMU source code (Platform.h)
       replace:
         path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/roms/edk2/OvmfPkg/AcpiTables/Platform.h"
         regexp: '{{ efi_acpi_creator_revision_regex }}'
@@ -376,7 +378,6 @@
         regexp: '{{ usb_mtp_regex }}'
         replace: '\1{{ usb_mtp_replacement }}\2'
 
-
     - name: Prepare QEMU USB device Hub - Manufacturer replacement facts
       set_fact:
         usb_hub_manufacturer_regex: |-
@@ -403,7 +404,18 @@
         regexp: '{{ usb_hub_product_regex }}'
         replace: '\1{{ usb_hub_product_replacement }}\2'
 
-    # TO DO: Replace USB HUB SERIALNUMBER with random value
+    - name: Prepare QEMU USB device Hub - Serial Number replacement facts
+      set_fact:
+        usb_hub_serial_regex: |-
+                (\s+\[STR_SERIALNUMBER\].*\")\d+(\",)$
+        usb_hub_serial_replacement: |-
+                {{ "%06d" | format(914159 | random(314160)) | string }}
+
+    - name: Replace QEMU USB device Hub - Serial Number
+      replace:
+        path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/hw/usb/dev-hub.c"
+        regexp: '{{ usb_hub_serial_regex }}'
+        replace: '\g<1>{{ usb_hub_serial_replacement }}\2'
 
     - name: Prepare QEMU USB device SmartCard - Product Description replacement facts
       set_fact:
@@ -430,8 +442,6 @@
         path: "{{ qemu_source_dir }}/qemu-{{ qemu_version }}/hw/usb/dev-smartcard-reader.c"
         regexp: '{{ usb_smartcard_product_vendor_regex }}'
         replace: '\1{{ usb_smartcard_product_vendor_replacement }}\2'
-
-
 
     - name: Prepare QEMU USB device Network - Manufacturer replacement facts
       set_fact:

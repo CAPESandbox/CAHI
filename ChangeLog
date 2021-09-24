@@ -1,3 +1,21 @@
+2021-09-24
+
+  -- Scenario: Enable Nested VT-x in cape-vm scenario (VirtualBox).
+  -- Scenario: Expose TCP port 9090 in cape-vm scenario to allow access to cockpit.
+  -- Scenario: Experiment replacing VirtualBox with KVM/QEMU/Libvirt for cape-vm development scenario.
+  -- Role dependencies: Install latest kernel (linux-generic-hwe-20.04) to ensure BPF support.
+  -- Role dependencies: Install updated apparmor parser to support libvirt apparmor profile BPF and PERFMON capabilities parsing.
+  -- Role KVM: Complete libvirt setup tasks.
+  -- Role KVM: Complete libguestfs setup tasks.
+  -- Role KVM: Randomize more values in QEMU Anti-VM.
+  -- Role KVM: Add tasks for setting up virt-manager.
+  -- Role KVM: Add tasks for setting up cockpit.
+  -- Role KVM: Upgrade to QEMU 6.1.0 and Libvirt 7.7.0
+  -- Role CIS: Add tasks for Section 4 of the CIS for Ubuntu Benchmarks.
+  -- Role CAPA: Update role to better support CAPA versions 2 and 3 (in progress).
+  -- Docs: Update Security_Automation_Tracker.
+  -- Docs: Update development documentation to illustrate using KVM/QEMU/Libvirt for cape-vm development scenario.
+
 2021-08-13
 
   -- Role: Update KVM role incorporating additional QEMU Anti-VM countermeasures (by @doomedraven).

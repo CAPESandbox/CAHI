@@ -1,3 +1,9 @@
 ---
+capa_dir: /opt/capa
+capa_rules_repo: https://github.com/fireeye/capa-rules.git
+capa_sigs_urls:
+  - https://github.com/fireeye/capa/raw/master/sigs/1_flare_msvc_rtf_32_64.sig
+  - https://github.com/fireeye/capa/raw/master/sigs/2_flare_msvc_atlmfc_32_64.sig
+  - https://github.com/fireeye/capa/raw/master/sigs/3_flare_common_libs.sig
 capa_repo_url:
 capa_source_code_dir: /tmp/capa
