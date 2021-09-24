@@ -16,9 +16,12 @@ platforms:
     box: ubuntu/focal64
     cpu: 4
     memory: 4096
+    provider_raw_config_args:
+      - "customize ['modifyvm', :id, '--nested-hw-virt', 'on']"
     instance_raw_config_args:
       - "vm.network 'forwarded_port', guest: 80, host: 8080"
       - "vm.network 'forwarded_port', guest: 443, host: 8443"
+      - "vm.network 'forwarded_port', guest: 9090, host: 9090"
 provisioner:
   name: ansible
   config_options:

@@ -7,6 +7,35 @@
   register: flare_capa_install
   ignore_errors: true
 
+- name: Create CAPA rules and signatures directories
+  file:
+    path: "{{ cape_main_dir }}/CAPEv2/data/{{ item }}"
+    state: directory
+  loop:
+    - capa-rules
+    - capa-signatures
+
+- name: Download CAPA rules
+  git:
+    repo: "{{ capa_rules_repo }}"
+    dest: "{{ cape_main_dir }}/CAPEv2/data/capa-rules"
+    force: true
+    update: true
+
+- name: Download CAPA signatures
+  get_url:
+    url: "{{ item }}"
+    dest: "{{ cape_main_dir }}/CAPEv2/data/capa-signatures"
+  loop: "{{ capa_sigs_urls }}"
+
+- name: Set permissions on CAPA directory
+  file:
+    path: "{{ cape_main_dir }}/CAPEv2/data"
+    state: directory
+    recurse: true
+    owner: "{{ cape_user }}"
+    group: "{{ cape_group }}"
+
 - name: Install CAPA via source code
   block:
     - name: Download CAPA source code
@@ -18,7 +47,7 @@
     - name: Update and initialize CAPA and rules
       command:
         cmd: "{{ item }}"
-        chdir: "{{ capa_source_code_dir }"
+        chdir: "{{ capa_source_code_dir }}"
       loop:
         - git pull
         - git submodule update --init rules

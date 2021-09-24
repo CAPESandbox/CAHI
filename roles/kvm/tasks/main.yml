@@ -2,7 +2,7 @@
 - name: Include KVM variables setup Tasks
   include_tasks: facts.yml
 
-- name: Include Qemu setup tasks
+- name: Include QEMU setup tasks
   include_tasks: qemu.yml
 
 - name: Include seabios setup tasks
@@ -10,6 +10,16 @@
 
 - name: Include libvirt setup tasks
   include_tasks: libvirt.yml
+
+- name: Include libguestfs setup tasks
+  include_tasks: libguestfs.yml
+
+- name: Include virt-manager setup tasks
+  include_tasks: virt-manager.yml
+
+- name: Include Cockpit setup tasks
+  include_tasks: cockpit.yml
+  when: cockpit_enable | bool
 
 #- name: Pin hypervisor packages
 #  copy:

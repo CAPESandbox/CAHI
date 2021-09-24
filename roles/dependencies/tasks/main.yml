@@ -1,4 +1,18 @@
 ---
+- name: Update Ubuntu kernel for BPF support
+  apt:
+    name: linux-generic-hwe-20.04
+    state: present
+  register: modern_kernel
+
+- name: Reboot
+  reboot:
+  when: modern_kernel is changed
+
+- name: Remove old kernel
+  apt:
+    autoremove: true
+    
 - name: Add Ubuntu security repository
   apt_repository:
     repo: "deb http://security.ubuntu.com/ubuntu {{ ansible_distribution_release }}-security main"
@@ -41,30 +55,27 @@
     - name: Register Canonical LivePatch
       command:
         cmd: "canonical-livepatch enable {{ livepatch_apitoken }}"
-        no_log: true
+      no_log: true
   when: livepatch_enable | bool and livepatch_apitoken | bool
 
 - name: Install CAPE dependencies apt packages
   apt:
     name: "{{ packages }}"
     state: present
-    update_cache: false
+    update_cache: true
 
+# Ansible Lint: Package installs should not use latest, use (noqa package-latest)
+# https://github.com/ansible-community/ansible-lint/issues/479
 - name: Ensure pip is updated to latest
   pip:
     name: pip
-    state: latest
+    state: latest # noqa package-latest
     executable: pip3
 
 - name: Download CAPE pip requirements file
   get_url:
     url: "{{ pip_requirements_file }}"
     dest: /tmp/requirements.txt
-
-#- name: Copy pip requirements file
-#  copy:
-#    src: requirements.txt
-#    dest: /tmp/requirements.txt
 
 - name: Clean up breaking distutils files prior to installing pip packages
   file:
@@ -79,3 +90,37 @@
   pip:
     requirements: /tmp/requirements.txt
     executable: pip3
+
+- name: Download and extract apparmor source code
+  unarchive:
+    src: "{{ apparmor_url }}"
+    dest: /tmp
+    remote_src: true
+
+- name: Build apparmor parser source code
+  make:
+    chdir: "/tmp/apparmor-{{ apparmor_version }}/parser"
+    params:
+      NUM_THREADS: "{{ ansible_processor_cores / 2 | int }}"
+      USE_SYSTEM: 1
+  environment:
+    USE_SYSTEM: 1
+    PYTHON: /usr/bin/python3
+    PYTHON_VERSION: 3
+    PYTHON_VERSIONS: python3
+
+- name: Package apparmor parser source code
+  command:
+    cmd: checkinstall -D --pkgname=apparmor-parser --default --install=no
+    chdir: "/tmp/apparmor-{{ apparmor_version }}/parser"
+    creates: "/tmp/apparmor-{{ apparmor_version }}/parser/apparmor-parser_{{ ansible_date_time.date | regex_replace('-') }}-1_amd64.deb"
+  environment:
+    USE_SYSTEM: 1
+    PYTHON: /usr/bin/python3
+    PYTHON_VERSION: 3
+    PYTHON_VERSIONS: python3
+
+- name: Install apparmor parser
+  apt:
+    deb: "/tmp/apparmor-{{ apparmor_version }}/parser/apparmor-parser_{{ ansible_date_time.date | regex_replace('-') }}-1_amd64.deb"
+    dpkg_options: 'force-overwrite'

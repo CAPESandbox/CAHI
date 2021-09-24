@@ -10,7 +10,7 @@
     dest: "{{ seabios_source_dir }}/seabios"
     force: true
 
-- name: Include SeaBios customization tasks
+- name: Include SeaBios anti-vm customization tasks
   include_tasks: seabios_anti.yml
 
 # First make (before Makefile changes) requires python2

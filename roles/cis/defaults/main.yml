@@ -80,6 +80,14 @@ xorg_packages:
 #####################################################
 # Section 4 - Logging and Auditing
 #####################################################
+cis_audit_rules_path: /etc/audit/rules.d
+cis_auditd_backlog_limit: 8192
+cis_auditd_max_log_file:
+cis_auditd_max_log_file_action: keep_logs
+cis_auditd_space_left_action: email
+cis_auditd_action_mail_acct: root
+cis_auditd_admin_space_left_action:
+cis_priviliged_auditd_rules: []
 
 #####################################################
 # Section 5 Access, Authentication and Authorization

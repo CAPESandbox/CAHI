@@ -1,0 +1,77 @@
+---
+- name: Install Virt-Manager dependency APT packages
+  apt:
+    name: "{{ virtmanager_apt_packages }}"
+    state: present
+    update_cache: true
+
+- name: Install Virt-Manager dependency PIP packages
+  pip:
+    name: "{{ virtmanager_pip_packages }}"
+    state: present
+    executable: pip3
+
+- name: Download and extract libvirt-glib source code
+  unarchive:
+    src: "{{ libvirt_glib_url }}/libvirt-glib-{{ libvirt_glib_version }}.tar.xz"
+    dest: /tmp
+    remote_src: true
+
+- name: Configure libvirt-glib source code
+  command:
+    cmd: /usr/local/bin/meson build
+    chdir: "/tmp/libvirt-glib-{{ libvirt_glib_version }}"
+  environment:
+    PKG_CONFIG_PATH: /usr/lib64/pkgconfig/
+
+- name: Build libvirt-glib source code
+  command:
+    cmd: /usr/local/bin/ninja -C build
+    chdir: "/tmp/libvirt-glib-{{ libvirt_glib_version }}"
+  environment:
+    PKG_CONFIG_PATH: /usr/lib64/pkgconfig/
+
+- name: Install libvirt-glib
+  command:
+    cmd: /usr/bin/checkinstall /usr/local/bin/ninja -C build install
+    chdir: "/tmp/libvirt-glib-{{ libvirt_glib_version }}"
+  environment:
+    PKG_CONFIG_PATH: /usr/lib64/pkgconfig/
+
+- name: Download Virt-Manager source code
+  git:
+    repo: "{{ virtmanager_repo_url }}"
+    dest: /tmp/virt-manager
+
+- name: Build Virt-Manager source code
+  command:
+    cmd: /usr/bin/python3 setup.py build
+    chdir: /tmp/virt-manager
+
+- name: Install Virt-Manager source code
+  command:
+    cmd: /usr/bin/python3 setup.py install
+    chdir: /tmp/virt-manager
+
+#- name: Install Virt-Manager
+#  pip:
+#    name: virt-manager
+#    state: present
+#    executable: pip3
+#    extra_args: "--no-index --find-links=file:///{{ virtmanager_source_code_dir}}"
+
+- name: Add libvirt default URI to environment
+  lineinfile:
+    path: "{{ item }}"
+    line: "export LIBVIRT_DEFAULT_URI=qemu:///system"
+    state: present
+    insertbefore: BOF
+  loop:
+    - "{{ ansible_env.HOME }}/.bashrc"
+    - "/home/{{ cape_user }}/.bashrc"
+
+- name: Schema
+  command:
+    cmd: /usr/bin/glib-compile-schemas --strict /usr/share/glib-2.0/schemas/
+  changed_when: false
+

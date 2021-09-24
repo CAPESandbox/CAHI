@@ -1,0 +1,53 @@
+---
+- name: Remove installed libguestfs packages
+  apt:
+    name: libguestfs-*
+    state: absent
+
+# Temporarly do not validate certs or use http
+# since *erlang-solutions.com certificate expired
+# on 2021-08-21.
+- name: Add Erlang repository GPG key
+  apt_key:
+    url: "{{ erlang_repo_key }}"
+    state: present
+    validate_certs: false
+
+# Temporarly do not validate certs or use http
+# since *erlang-solutions.com certificate expired
+# on 2021-08-21.
+- name: Add Erlang repository
+  apt_repository:
+    repo: "deb http://packages.erlang-solutions.com/debian {{ ansible_distribution_release }} contrib"
+    state: present
+    filename: erlang
+    update_cache: false
+
+- name: Install libguestfs dependency packages
+  apt:
+    name: "{{ erlang_apt_packages }}"
+    state: present
+    update_cache: true
+
+- name: Download libguestfs source code
+  git:
+    repo: "{{ libguestfs_repo_url }}"
+    dest: "{{ libguestfs_dir }}/libguestfs"
+    recursive: true
+
+- name: Autorecof libguestfs
+  command:
+    cmd: autoreconf -i
+    chdir: "{{ libguestfs_dir }}/libguestfs"
+    creates: "{{ libguestfs_dir }}/configure"
+
+- name: Configure libguestfs
+  command:
+    cmd: ./configure CFLAGS=-fPIC
+    chdir: "{{ libguestfs_dir }}/libguestfs"
+
+- name: Make libguestfs
+  make:
+    chdir: "{{ libguestfs_dir }}/libguestfs"
+    params:
+      NUM_THREADS: "{{ ansible_processor_cores / 2 | int }}"

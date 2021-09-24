@@ -51,18 +51,49 @@
 
 - name: Configure libvirt source code
   command:
-    cmd: "/usr/local/bin/meson build {{ ['-D '] | product(libvirt_meson_build_options) | map('join') | join(' ') }}"
+    cmd: "/usr/local/bin/meson build {{ ['--'] | product(libvirt_meson_core_options) | map('join') | join(' ') }} {{ ['-D'] | product(libvirt_meson_build_options) | map('join') | join(' ') }}"
     chdir: "{{ libvirt_source_dir }}/libvirt-{{ libvirt_version }}"
+  environment:
+    CFLAGS: -O2 -g -pipe -Wall -Werror=format-security -Wp,-D_FORTIFY_SOURCE=2 -Wp,-D_GLIBCXX_ASSERTIONS -fexceptions -fstack-protector-strong -grecord-gcc-switches -m64 -mtune=generic -fasynchronous-unwind-tables -fstack-clash-protection -fcf-protection
+    CXXFLAGS: -O2 -g -pipe -Wall -Werror=format-security -Wp,-D_FORTIFY_SOURCE=2 -Wp,-D_GLIBCXX_ASSERTIONS -fexceptions -fstack-protector-strong -grecord-gcc-switches -m64 -mtune=generic -fasynchronous-unwind-tables -fstack-clash-protection -fcf-protection
+    LDFLAGS: -Wl,-z,relro  -Wl,-z,now
+    PKG_CONFIG_PATH: /usr/lib64/pkgconfig:/usr/share/pkgconfig
 
 - name: Build libvirt source code
   command:
-    cmd: /usr/local/bin/ninja -C build
+    cmd: /usr/bin/checkinstall /usr/local/bin/ninja -C build
     chdir: "{{ libvirt_source_dir }}/libvirt-{{ libvirt_version }}"
 
+# Also see this: https://blog.devgenius.io/how-to-build-debian-packages-from-meson-ninja-d1c28b60e709
 - name: Install libvirt
   command:
-    cmd: /usr/local/bin/ninja -C build install
+    cmd: /usr/bin/checkinstall /usr/local/bin/ninja -C build install
     chdir: "{{ libvirt_source_dir }}/libvirt-{{ libvirt_version }}"
+
+- name: Template libvirtd configuration file
+  template:
+    src: libvirtd.conf.j2
+    dest: /etc/libvirt/libvirtd.conf
+    owner: root
+    group: root
+
+- name: Configure apparmor security driver in qemu.conf
+  lineinfile:
+    path: /etc/libvirt/qemu.conf
+    regexp: '^#security_driver'
+    line: 'security_driver = "apparmor"'
+
+- name: Configure user in qemu.conf
+  lineinfile:
+    path: /etc/libvirt/qemu.conf
+    regexp: '^#user = '
+    line: 'user = "{{ cape_user }}"'
+
+- name: Configure group in qemu.conf
+  lineinfile:
+    path: /etc/libvirt/qemu.conf
+    regexp: '^#group = '
+    line: 'group = "libvirt"'
 
 - name: Update caching paths
   command:
@@ -71,4 +102,159 @@
     - /usr/sbin/ldconfig
     - /usr/bin/updatedb
 
+# Below task fails:
+# ERROR: AppArmor parser error for /etc/apparmor.d/usr.sbin.libvirtd in 
+# /etc/apparmor.d/usr.sbin.libvirtd at line 29: Invalid capability bpf.
+# To-Do: identify and fix issue
+#        Fix indentified: apparmor must be ad version >= 2.13.6 < 3.X
+- name: Set libvirt apparmor to complain mode
+  command:
+    cmd: /usr/sbin/aa-complain "{{ item }}"
+  loop:
+    - /etc/apparmor.d/usr.sbin.libvirtd
+    - /etc/apparmor.d/usr.sbin.libvirtd
+    - /usr/sbin/libvirtd
+    - /usr/libexec/virt-aa-helper
 
+- name: Download libvirt-python source code
+  get_url:
+    url: "{{ libvirt_download_url }}/python/libvirt-python-{{ libvirt_version }}.tar.gz"
+    dest: "/tmp/libvirt-python-{{ libvirt_version }}.tar.gz"
+
+- name: Install libvirt-python
+  pip:
+    name: "file:////tmp/libvirt-python-{{ libvirt_version }}.tar.gz"
+    state: present
+    executable: pip3
+  environment:
+    PKG_CONFIG_PATH: /usr/lib64/pkgconfig/
+
+- name: Create libvirt group
+  group:
+    name: libvirt
+    state: present
+
+- name: Add CAPE user to libvirt group
+  user:
+    name: "{{ cape_user }}"
+    append: true
+    groups: libvirt
+
+- name: Inventory system services
+  service_facts: null
+
+- name: Enable and start libvirt-related services
+  systemd:
+    name: "{{ item }}"
+    enabled: true
+    state: restarted
+  when: ansible_facts.services[item] is defined
+  loop:
+    - libvirtd.service
+    - virtlogd.service
+
+# We add ignore_errors since bridge module is not loaded
+# https://wiki.libvirt.org/page/Net.bridge.bridge-nf-call_and_sysctl.conf
+- name: Disable processing bridge packets by iptables - Sysctl
+  sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    state: present
+    reload: true
+    sysctl_set: true
+  ignore_errors: true
+  loop:
+    - { name: net.bridge.bridge-nf-call-iptables, value: 0 }
+    - { name: net.bridge.bridge-nf-call-ip6tables, value: 0 }
+    - { name: net.bridge.bridge-nf-call-arptables, value: 0 }
+
+- name: Create KVM group
+  group:
+    name: kvm
+    state: present
+  
+- name: Add CAPE user to KVM group
+  user:
+    name: "{{ cape_user }}"
+    append: true
+    groups: kvm
+
+- name: Add KVM udev rules
+  lineinfile:
+    path: /etc/udev/rules.d/50-qemu-kvm.rules
+    line: 'KERNEL=="kvm", GROUP="kvm", MODE="0660"'
+    state: present
+    create: true
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Add KVM module modprobe parameters
+  lineinfile:
+    path: /etc/modprobe.d/kvm.conf
+    line: "options kvm {{ item }}"
+    state: present
+    create: true
+    owner: root
+    group: root
+    mode: 0644
+  loop:
+    - "ignore_msrs=Y"
+    - "report_ignored_msrs=N"
+
+# grub-editenv - list command on Ubuntu always returns nothing
+- name: Query current grub configurations
+  command: cat /etc/default/grub
+  register: grubopts
+  changed_when: false
+
+- name: Ignore KVM msrs in grub
+  lineinfile:
+    path: /etc/default/grub
+    state: present
+    backrefs: true
+    regexp: '^(GRUB_CMDLINE_LINUX=(?!.*kvm\.ignore_msrs)\"[^\"]+)(\".*)'
+    line: '\1 kvm.ignore_msrs=1\2'
+  register: grub_cmdline_ignore_msrs1
+  when:
+    - grubopts.stdout_lines is defined
+    - grubopts.stdout_lines | length > 0
+    - not grubopts.stdout | regex_search('^GRUB_CMDLINE_LINUX=\"\"', multiline=True)
+
+- name: Ignore KVM msrs in grub
+  lineinfile:
+    path: /etc/default/grub
+    state: present
+    backrefs: true
+    regexp: '^(GRUB_CMDLINE_LINUX=(?!.*kvm\.ignore_msrs)\"[^\"]?)(\".*)'
+    line: '\1kvm.ignore_msrs=1\2'
+  register: grub_cmdline_ignore_msrs2
+  when:
+    - grubopts.stdout_lines is defined
+    - grubopts.stdout_lines | length > 0
+    - grubopts.stdout | regex_search('^GRUB_CMDLINE_LINUX=\"\"', multiline=True)
+
+- name: Disable reporting KVM ignored msrs errors in grub
+  lineinfile:
+    path: /etc/default/grub
+    state: present
+    backrefs: true
+    regexp: '^(GRUB_CMDLINE_LINUX=(?!.*kvm\.report_ignored_msrs)\"[^\"]+)(\".*)'
+    line: '\1 kvm.report_ignored_msrs=0\2'
+  register: grub_cmdline_ignore_report_msrs
+
+# To-Do: Add check for CPU type (Intel vs. AMD)
+# and add the relevant value accordingly. Currently
+# it is hardcoded for Intel-based CPUs.
+- name: Enable intel_iommu in grub
+  lineinfile:
+    path: /etc/default/grub
+    state: present
+    backrefs: true
+    regexp: '^(GRUB_CMDLINE_LINUX=(?!.*intel_iommu)\"[^\"]+)(\".*)'
+    line: '\1 intel_iommu=on\2'
+  register: grub_cmdline_intel_iommu
+
+- name: Update grub
+  command: /usr/sbin/update-grub
+  when: grub_cmdline_ignore_msrs1 is changed or grub_cmdline_ignore_msrs2 is changed or grub_cmdline_ignore_report_msrs is changed or grub_cmdline_intel_iommu is changed
