@@ -1,7 +1,7 @@
 flor
 Pebble
 pymisp
-cryptography==39.0.1
+cryptography==41.0.0
 requests[security,socks]
 pyOpenSSL
 pefile
