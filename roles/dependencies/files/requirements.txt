@@ -18,7 +18,7 @@ xmltodict
 future
 python-dateutil
 requests_file
-gevent==20.4.0
+gevent==23.9.1
 simplejson
 pyvmomi
 pyinstaller
