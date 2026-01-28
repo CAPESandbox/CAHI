@@ -1,0 +1,25 @@
+---
+- name: Converge Core Servers (CAPE Engine)
+  hosts: core_servers
+  become: true
+  vars:
+    cape_install_type: base
+  tasks:
+    - include_role:
+        name: time
+    - include_role:
+        name: dependencies
+    - include_role:
+        name: yara
+    - include_role:
+        name: volatility
+    - include_role:
+        name: maxmind
+    - include_role:
+        name: suricata
+    - include_role:
+        name: clamav
+    - include_role:
+        name: kvm
+    - include_role:
+        name: cape

@@ -35,7 +35,7 @@
     path: "{{ cape_main_dir }}/CAPEv2/conf/cuckoo.conf"
     section: database
     option: connection
-    value: "postgresql://{{ cape_user }}:{{ cape_pass }}@localhost:5432/{{ cape_user }}"
+    value: "postgresql://{{ cape_user }}:{{ cape_pass }}@{{ cape_db_host | default('localhost') }}:5432/{{ cape_user }}"
     backup: true
 
 - name: Configure CAPE hypervisor backend

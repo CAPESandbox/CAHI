@@ -1,0 +1,80 @@
+---
+scenario:
+  name: cape-ship
+driver:
+  name: docker
+lint: |
+  set -e
+  yamllint .
+  ansible-lint main.yml
+platforms:
+  - name: cape-postgres
+    hostname: cape-postgres
+    image: "postgres:17-alpine"
+    pull: true
+    env:
+      POSTGRES_USER: cape
+      POSTGRES_PASSWORD: MyCAPEPassword
+      POSTGRES_DB: cape
+    groups:
+      - db_servers
+    networks:
+      - name: cape_net
+  
+  - name: cape-mongo
+    hostname: cape-mongo
+    image: "mongo:7.0"
+    pull: true
+    groups:
+      - db_servers
+    networks:
+      - name: cape_net
+
+  - name: cape-core-server
+    hostname: cape-core-server
+    image: "cape-core-server:latest"
+    dockerfile: ../../dockerfiles/ubuntu2404/Dockerfile
+    pull: false
+    privileged: true
+    groups:
+      - core_servers
+    networks:
+      - name: cape_net
+    exposed_ports:
+      - 8000/tcp
+    published_ports:
+      - 8000:8000/tcp
+
+  - name: cape-nginx
+    hostname: cape-nginx
+    image: "nginx:alpine"
+    pull: true
+    groups:
+      - web_servers
+    networks:
+      - name: cape_net
+    exposed_ports:
+      - 80/tcp
+      - 443/tcp
+    published_ports:
+      - 8080:80/tcp
+      - 8443:443/tcp
+
+provisioner:
+  name: ansible
+  config_options:
+    ssh_connection:
+      pipelining: true
+  inventory:
+    links:
+      group_vars: ../../group_vars
+    host_vars:
+      cape-core-server:
+        ansible_user: ansible
+        cape_db_host: cape-postgres
+        cape_mongo_host: cape-mongo
+  env:
+    ANSIBLE_ROLES_PATH: ../../roles
+
+verifier:
+  name: ansible
